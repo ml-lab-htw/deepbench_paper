@@ -1,0 +1,241 @@
+:root {
+    --bg-color: #f8f9fa;
+    --text-color: #212529;
+    --primary-color: #007bff;
+    --header-bg: #ffffff;
+    --card-bg: #ffffff;
+    --border-color: #dee2e6;
+    --shadow-color: rgba(0, 0, 0, 0.05);
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+header {
+    background-color: var(--header-bg);
+    color: var(--text-color);
+    padding: 2rem 1rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+header h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2.5rem;
+    line-height: 0.95;
+}
+
+.small-of {
+    font-size: 1.5rem;
+    font-weight: normal;
+    vertical-align: middle;
+}
+
+header .authors {
+    font-style: italic;
+    color: #6c757d;
+}
+
+main {
+    padding: 2rem;
+    max-width: 960px;
+    margin: 0 auto;
+}
+
+section {
+    background-color: var(--card-bg);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px var(--shadow-color);
+}
+
+h2 {
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 0.5rem;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+}
+
+h3 {
+    margin-top: 0;
+    color: #495057;
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: #0056b3;
+}
+
+#corruptions-gallery {
+    text-align: center;
+}
+
+#thumbnail-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.thumbnail {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+
+.thumbnail:hover {
+    transform: scale(1.05);
+    border-color: #adb5bd;
+}
+
+.thumbnail.active {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+}
+
+#large-image-container {
+    margin-top: 1rem;
+}
+
+#large-image {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+#large-image-caption {
+    font-style: italic;
+    margin-top: 1rem;
+    color: #6c757d;
+    max-width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#resources ul {
+    list-style: none;
+    padding: 0;
+}
+
+#resources li {
+    margin-bottom: 0.5rem;
+}
+
+#resources li::before {
+    content: '🔗';
+    margin-right: 0.5rem;
+}
+
+/* Experiments Section */
+.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    justify-content: center;
+}
+
+.tab {
+    padding: 10px 15px;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background-color 0.3s;
+}
+
+.tab:hover {
+    background-color: #dee2e6;
+}
+
+.tab.active {
+    background-color: var(--card-bg);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+    position: relative;
+    top: 1px;
+}
+
+.tab img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.tab-content {
+    border: 1px solid var(--border-color);
+    padding: 2rem;
+    border-radius: 0 8px 8px 8px;
+}
+
+.use-case-content {
+    display: none;
+}
+
+.use-case-content.active {
+    display: block;
+}
+
+#plots-container {
+    display: block;
+    margin-top: 1rem;
+    text-align: center;
+}
+
+#plots-container img {
+    max-width: 100%;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    box-sizing: border-box;
+    margin-bottom: 2rem; /* Add space between stacked plots */
+}
+
+
+/* Social Links */
+.social-links {
+    text-align: center;
+    margin-top: 1.5rem;
+}
+
+.social-link {
+    font-size: 3rem;
+    color: var(--text-color);
+    margin: 0 0.75rem;
+    transition: color 0.3s;
+}
+
+.social-link:hover {
+    color: var(--primary-color);
+}
+
+.citation-link {
+    font-weight: bold;
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+
+.citation-link:hover {
+    color: #0056b3;
+}

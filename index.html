@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Vision Robustness</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Domain-Specific Robustness Evaluation</br><span class="small-of">of</span></br>Vision-Language Models</h1>
+        <p class="authors">Mario Koddenbrock, Rudolf Hoffmann, David Brodmann, Erik Rodner</p>
+    </header>
+    <main>
+        <section id="abstract">
+            <h2>Abstract</h2>
+            <p>Robustness evaluation of computer vision and vision-language models (VLMs) remains a critical challenge, particularly when models are deployed in domain-specific settings that differ significantly from their training distributions. While existing benchmarks target generic corruptions or adversarial attacks, they offer limited insight into how models perform under realistic visual conditions, such as lighting variability in handheld photography or anatomical variation in medical imaging. Additionally, the increasing reliance on large pretrained foundation models with opaque data pipelines complicates the analysis of potential failure modes. In this work, we introduce DeepBench, a framework for evaluating domain-specific robustness without requiring labeled data. Given a high-level description of the deployment environment, a large language model (LLM) selects a context-relevant corruption set that simulates expected visual variability. The framework supports both standard accuracy-based metrics and an unsupervised measure of prediction consistency, the label-flip probability (LFP), enabling robustness analysis even in data-scarce applications. We systematically benchmark five popular VLMs—CLIP, SigLIP, ALIGN, LLaVA, and Gemma—across six real-world domains. Our results show that robustness and performance vary significantly by use case: no single model dominates across all domains. These findings underscore the importance of domain-specific evaluation, which captures failure modes that generic robustness benchmarks may overlook. Furthermore, we validate LFP as a reliable proxy for accuracy under corruption, supporting its use in label-free settings. We release our framework as open-source software on <a href="https://github.com/ml-lab-htw/deepbench">GitHub</a>.</p>
+            <div class="social-links">
+                <a href="https://github.com/ml-lab-htw/deepbench" class="social-link" aria-label="GitHub Repository" target="_blank">
+                    <i class="fab fa-github"></i>
+                </a>
+                <a href="https://arxiv.org/abs/2506.23663" class="social-link" aria-label="arXiv Paper" target="_blank">
+                    <i class="fas fa-file-pdf"></i>
+                </a>
+            </div>
+        </section>
+
+        <section id="corruptions-gallery">
+            <h2>Corruption Examples</h2>
+            <h3 id="corruption-type-heading"></h3>
+            <p id="corruption-description"></p>
+            <div id="thumbnail-container">
+                <!-- Thumbnails will be populated by JavaScript -->
+            </div>
+            <h3>Severity Levels</h3>
+            <div id="large-image-container">
+                <img id="large-image" src="" alt="Corruption example">
+            </div>
+        </section>
+
+        <section id="experiments">
+            <h2>Experiments</h2>
+            <div class="tabs"><!-- no longer used; kept for layout compatibility --></div>
+
+            <!-- Use case selection (thumbnail gallery like corruptions) -->
+            <h3 id="usecase-type-heading"></h3>
+            <p id="usecase-description"></p>
+            <div id="usecase-thumbnail-container"></div>
+
+            <div id="plots-container">
+                <!-- Plots will be populated by JavaScript -->
+            </div>
+        </section>
+
+        <section id="dataset-sources">
+            <h2>Dataset Sources</h2>
+            <div id="dataset-source-content">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+        </section>
+
+        <section id="citation">
+            <h2>How to Cite</h2>
+            <pre><code>@misc{koddenbrock2025deepbench,
+    title={DeepBench: A Framework for Domain-Specific Robustness Evaluation of Vision-Language Models},
+    author={Mario Koddenbrock and Rudolf Hoffmann and David Brodmann and Erik Rodner},
+    year={2025},
+    eprint={2506.23663},
+    archivePrefix={arXiv},
+    primaryClass={cs.CV}
+}</code></pre>
+        </section>
+    </main>
+    <script src="js/main.js"></script>
+</body>
+</html>
