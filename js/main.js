@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- STATE (Specialists) ---
     let currentSpecialistsDomain = 'MedicalDiagnosis';
 
+    // --- STATE (Architecture) ---
+    let currentArchUseCase = 'AutonomousDriving';
+
     // --- DOM ELEMENTS ---
     const largeImage = document.getElementById('large-image');
     const corruptionTypeHeading = document.getElementById('corruption-type-heading');
@@ -20,6 +23,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const useCaseDescriptionBox = document.getElementById('usecase-description-box');
     const filterToggle = document.getElementById('filter-by-corruption');
     const plotContextLabel = document.getElementById('plot-context-label');
+
+    // --- DOM (Architecture) ---
+    const archUseCaseHeading = document.getElementById('arch-usecase-type-heading');
+    const archUseCaseThumbs = document.getElementById('arch-usecase-thumbnail-container');
+    const archPlotsContainer = document.getElementById('arch-plots-container');
+    const archFilterToggle = document.getElementById('arch-filter-by-corruption');
+    const archPlotContextLabel = document.getElementById('arch-plot-context-label');
 
     // --- DOM (Specialists) ---
     const specialistsHeading = document.getElementById('specialists-type-heading');
@@ -143,6 +153,29 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Ensure the ARCH filter toggle state reflects availability; then update arch plots
+    function ensureArchFilterToggleState() {
+        if (!archPlotsContainer) return Promise.resolve();
+        const uc = currentArchUseCase;
+        const corr = currentCorruption;
+        const corrForFile = plotCorruptionNameMap[corr] || corr;
+
+        const perCorrAcc = `assets/experiments/architecture/acc_${uc}_${corrForFile}.png`;
+        const perCorrFlip = `assets/experiments/architecture/flip_${uc}_${corrForFile}.png`;
+
+        return Promise.all([imageExists(perCorrAcc), imageExists(perCorrFlip)]).then(([accOk, flipOk]) => {
+            const available = accOk && flipOk;
+            if (archFilterToggle) {
+                archFilterToggle.disabled = false;
+                archFilterToggle.title = available ? '' : 'Per-corruption plots not available for this selection (showing combined instead)';
+                if (!available && archFilterToggle.checked && archPlotContextLabel) {
+                    archPlotContextLabel.textContent = `Per-corruption plot not available for ${humanizeCamelCase(corr)} in ${humanizeCamelCase(uc)} — showing combined.`;
+                }
+            }
+            updateArchitecturePlotsView();
+        });
+    }
+
     // --- UPDATE FUNCTIONS ---
     function updateAllViews() {
         updateLargeImageView();
@@ -151,6 +184,8 @@ document.addEventListener('DOMContentLoaded', () => {
         lockUseCaseDescriptionHeight();
         // Defer plot updates until we know availability to avoid flicker
         ensureFilterToggleState();
+        // Also update architecture section (uses same selected corruption)
+        ensureArchFilterToggleState();
     }
 
     function updateLargeImageView() {
@@ -262,6 +297,92 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } else {
             plotContextLabel.textContent = '';
+        }
+    }
+
+    // Architecture section updaters
+    function updateArchitectureUseCaseHeading() {
+        if (!archUseCaseHeading) return;
+        const useCaseName = humanizeCamelCase(currentArchUseCase);
+        archUseCaseHeading.innerHTML = `Selected: <strong>${useCaseName}</strong>`;
+    }
+
+    function updateArchitectureActiveThumb() {
+        if (!archUseCaseThumbs) return;
+        archUseCaseThumbs.querySelectorAll('.thumbnail').forEach(img => {
+            img.classList.toggle('active', img.dataset.usecase === currentArchUseCase);
+        });
+    }
+
+    function updateArchitecturePlotsView() {
+        if (!archPlotsContainer) return;
+        const accImg = document.getElementById('arch-acc-plot');
+        const flipImg = document.getElementById('arch-flip-plot');
+        const uc = currentArchUseCase;
+        const corr = currentCorruption;
+        const corrForFile = plotCorruptionNameMap[corr] || corr;
+
+        const combinedAcc = `assets/experiments/architecture/acc_${uc}.png`;
+        const combinedFlip = `assets/experiments/architecture/flip_${uc}.png`;
+        const perCorrAcc = `assets/experiments/architecture/acc_${uc}_${corrForFile}.png`;
+        const perCorrFlip = `assets/experiments/architecture/flip_${uc}_${corrForFile}.png`;
+
+        const showPerCorruption = !!(archFilterToggle && archFilterToggle.checked);
+        let anyFallbackUsed = false;
+
+        // Toggle side-by-side layout when showing per-corruption
+        archPlotsContainer.classList.toggle('side-by-side', showPerCorruption);
+
+        function setWithFallback(img, primary, fallback, altPrimary, altFallback) {
+            img.onerror = null;
+            img.src = primary;
+            img.alt = altPrimary;
+            img.onerror = () => {
+                img.onerror = null;
+                img.src = fallback;
+                img.alt = altFallback;
+                anyFallbackUsed = true;
+                updateArchitecturePlotContextLabel(showPerCorruption, uc, corr, anyFallbackUsed);
+            };
+        }
+
+        if (showPerCorruption) {
+            setWithFallback(
+                accImg,
+                perCorrAcc,
+                combinedAcc,
+                `Balanced accuracy (architecture) for ${humanizeCamelCase(uc)} — ${humanizeCamelCase(corr)}`,
+                `Balanced accuracy (architecture) for ${humanizeCamelCase(uc)} (combined)`
+            );
+            setWithFallback(
+                flipImg,
+                perCorrFlip,
+                combinedFlip,
+                `Label flip probability (architecture) for ${humanizeCamelCase(uc)} — ${humanizeCamelCase(corr)}`,
+                `Label flip probability (architecture) for ${humanizeCamelCase(uc)} (combined)`
+            );
+        } else {
+            accImg.onerror = null;
+            flipImg.onerror = null;
+            accImg.src = combinedAcc;
+            accImg.alt = `Balanced accuracy (architecture) for ${humanizeCamelCase(uc)} (combined)`;
+            flipImg.src = combinedFlip;
+            flipImg.alt = `Label flip probability (architecture) for ${humanizeCamelCase(uc)} (combined)`;
+        }
+
+        updateArchitecturePlotContextLabel(showPerCorruption, uc, corr, anyFallbackUsed);
+    }
+
+    function updateArchitecturePlotContextLabel(showPerCorruption, uc, corr, usedFallback = false) {
+        if (!archPlotContextLabel) return;
+        if (showPerCorruption) {
+            if (usedFallback) {
+                archPlotContextLabel.textContent = `Per-corruption plot not available for ${humanizeCamelCase(corr)} in ${humanizeCamelCase(uc)} — showing combined.`;
+            } else {
+                archPlotContextLabel.textContent = `Showing: ${humanizeCamelCase(uc)} — ${humanizeCamelCase(corr)}`;
+            }
+        } else {
+            archPlotContextLabel.textContent = '';
         }
     }
 
@@ -379,6 +500,68 @@ document.addEventListener('DOMContentLoaded', () => {
         updateAllViews();
     }
 
+    function initializeArchitecture() {
+        if (!archUseCaseThumbs || !archPlotsContainer) return;
+
+        // Thumbnails
+        archUseCaseThumbs.innerHTML = '';
+        useCases.forEach(useCase => {
+            const thumb = createUseCaseThumbnail(useCase, () => {
+                currentArchUseCase = useCase;
+                updateArchitectureUseCaseHeading();
+                updateArchitectureActiveThumb();
+                ensureArchFilterToggleState();
+            });
+            archUseCaseThumbs.appendChild(thumb);
+        });
+
+        // Restore persisted architecture toggle
+        if (archFilterToggle) {
+            const saved = localStorage.getItem('archFilterByCorruption');
+            if (saved === '1' || saved === '0') {
+                archFilterToggle.checked = saved === '1';
+            }
+        }
+
+        // Plots container content
+        archPlotsContainer.innerHTML = '';
+
+        const accBlock = document.createElement('div');
+        accBlock.className = 'plot-block';
+        const accTitle = document.createElement('h3');
+        accTitle.textContent = 'Balanced Accuracy';
+        const accImg = document.createElement('img');
+        accImg.id = 'arch-acc-plot';
+        accImg.onerror = () => { accImg.alt = 'Plot not available.'; };
+        accBlock.appendChild(accTitle);
+        accBlock.appendChild(accImg);
+        archPlotsContainer.appendChild(accBlock);
+
+        const flipBlock = document.createElement('div');
+        flipBlock.className = 'plot-block';
+        const flipTitle = document.createElement('h3');
+        flipTitle.textContent = 'Label Flip Probability';
+        const flipImg = document.createElement('img');
+        flipImg.id = 'arch-flip-plot';
+        flipImg.onerror = () => { flipImg.alt = 'Plot not available.'; };
+        flipBlock.appendChild(flipTitle);
+        flipBlock.appendChild(flipImg);
+        archPlotsContainer.appendChild(flipBlock);
+
+        // Toggle handler
+        if (archFilterToggle) {
+            archFilterToggle.addEventListener('change', () => {
+                localStorage.setItem('archFilterByCorruption', archFilterToggle.checked ? '1' : '0');
+                updateArchitecturePlotsView();
+            });
+        }
+
+        // Initial state
+        updateArchitectureUseCaseHeading();
+        updateArchitectureActiveThumb();
+        ensureArchFilterToggleState();
+    }
+
     function createThumbnail(corruptionName, onClick) {
         const thumbnail = document.createElement('img');
         thumbnail.classList.add('thumbnail');
@@ -480,4 +663,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Kick off base and specialists sections
     initialize();
     initializeSpecialists();
+    // Kick off architecture section
+    initializeArchitecture();
 });

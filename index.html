@@ -81,6 +81,22 @@
             </div>
         </section>
 
+        <!-- New: Experiment 4 - Architecture -->
+        <section id="experiments-architecture">
+            <h2>How Does Model Architecture Affect Robustness?</h2>
+            <p class="exp-summary"><strong>Answer:</strong> Transformer-based models with higher capacity tend to show stronger robustness to domain-specific corruptions; smaller patch sizes have mixed effects. <strong>Setup:</strong> We compare CLIP variants across architecture (ResNet vs. ViT), patch size, input resolution, and activation, all trained on the same OpenAI dataset. Models are evaluated across the six domains with their domain-specific corruption sets; we report balanced accuracy and label flip probability per domain and corruption. <strong>Results:</strong> ViTs generally outperform ResNets; higher input resolution (ViT‑L/14@336) reduces corruption error across domains; Quick‑GELU improves robustness over the ViT‑L/14 baseline in most domains.</p>
+
+            <h3 id="arch-usecase-type-heading"></h3>
+            <div id="arch-usecase-thumbnail-container"></div>
+
+            <div id="arch-plot-options" class="plot-options">
+                <label><input type="checkbox" id="arch-filter-by-corruption"> Show only selected corruption</label>
+                <span id="arch-plot-context-label" class="plot-context-label"></span>
+            </div>
+
+            <div id="arch-plots-container"></div>
+        </section>
+
         <section id="citation">
             <h2>How to Cite</h2>
             <pre><code>@misc{koddenbrock2025deepbench,
