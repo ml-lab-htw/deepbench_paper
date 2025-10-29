@@ -283,3 +283,8 @@ a:hover {
 .citation-link:hover {
     color: #0056b3;
 }
+
+.exp-summary {
+    margin: 0.5rem 0 1rem 0;
+    color: #495057;
+}

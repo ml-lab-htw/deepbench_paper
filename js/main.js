@@ -98,13 +98,48 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Check if an image URL exists by attempting to load it
+    function imageExists(url) {
+        return new Promise(resolve => {
+            const img = new Image();
+            img.onload = () => resolve(true);
+            img.onerror = () => resolve(false);
+            img.src = url;
+        });
+    }
+
+    // Ensure the filter toggle state reflects availability; then update plots
+    function ensureFilterToggleState() {
+        const uc = currentUseCase;
+        const corr = currentCorruption;
+        const corrForFile = plotCorruptionNameMap[corr] || corr;
+
+        const perCorrAcc = `assets/experiments/main/acc_${uc}_${corrForFile}.png`;
+        const perCorrFlip = `assets/experiments/main/flip_${uc}_${corrForFile}.png`;
+
+        return Promise.all([imageExists(perCorrAcc), imageExists(perCorrFlip)]).then(([accOk, flipOk]) => {
+            const available = accOk && flipOk;
+            // Do NOT change checkbox state; keep it as user set it.
+            // Optionally hint unavailability via title/label, but keep it enabled and checked state intact.
+            if (filterToggle) {
+                filterToggle.disabled = false; // always allow user to keep preference
+                filterToggle.title = available ? '' : 'Per-corruption plots not available for this selection (showing combined instead)';
+                if (!available && filterToggle.checked && plotContextLabel) {
+                    plotContextLabel.textContent = `Per-corruption plot not available for ${humanizeCamelCase(corr)} in ${humanizeCamelCase(uc)} — showing combined.`;
+                }
+            }
+            updatePlotsView();
+        });
+    }
+
     // --- UPDATE FUNCTIONS ---
     function updateAllViews() {
         updateLargeImageView();
-        updatePlotsView();
         updateDatasetSourceView();
         updateUseCaseSelectionView();
         lockUseCaseDescriptionHeight();
+        // Defer plot updates until we know availability to avoid flicker
+        ensureFilterToggleState();
     }
 
     function updateLargeImageView() {
@@ -157,8 +192,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const perCorrFlip = `assets/experiments/main/flip_${uc}_${corrForFile}.png`;
 
         const showPerCorruption = !!(filterToggle && filterToggle.checked);
+        let anyFallbackUsed = false;
 
-        // Helper: apply src with one-time fallback
+        // Helper: apply src with one-time fallback, set flag and label on fallback
         function setWithFallback(img, primary, fallback, altPrimary, altFallback) {
             img.onerror = null; // reset any previous handler
             img.src = primary;
@@ -167,6 +203,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 img.onerror = null; // avoid loops
                 img.src = fallback;
                 img.alt = altFallback;
+                anyFallbackUsed = true;
+                updatePlotContextLabel(showPerCorruption, uc, corr, anyFallbackUsed);
             };
         }
 
@@ -195,13 +233,17 @@ document.addEventListener('DOMContentLoaded', () => {
             flipImg.alt = `Label flip probability for ${humanizeCamelCase(uc)} (combined)`;
         }
 
-        updatePlotContextLabel(showPerCorruption, uc, corr);
+        updatePlotContextLabel(showPerCorruption, uc, corr, anyFallbackUsed);
     }
 
-    function updatePlotContextLabel(showPerCorruption, uc, corr) {
+    function updatePlotContextLabel(showPerCorruption, uc, corr, usedFallback = false) {
         if (!plotContextLabel) return;
         if (showPerCorruption) {
-            plotContextLabel.textContent = `Showing: ${humanizeCamelCase(uc)} — ${humanizeCamelCase(corr)}`;
+            if (usedFallback) {
+                plotContextLabel.textContent = `Per-corruption plot not available for ${humanizeCamelCase(corr)} in ${humanizeCamelCase(uc)} — showing combined.`;
+            } else {
+                plotContextLabel.textContent = `Showing: ${humanizeCamelCase(uc)} — ${humanizeCamelCase(corr)}`;
+            }
         } else {
             plotContextLabel.textContent = '';
         }
