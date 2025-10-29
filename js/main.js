@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'ali2016detection': 'https://www.thinkmind.org/index.php?view=article&articleid=icsea_2016_10_30_30103',
         'baby2017automatic': 'https://ieeexplore.ieee.org/document/7953361',
         'al2020dataset': 'https://www.sciencedirect.com/science/article/pii/S235234091931228X',
-        'joo2023classification': 'https://www.mdpi.com/2075-4418/13/8/1380', // This seems to be a different paper, but using what's in bib
+        'joo2023classification': 'https://www.mdpi.com/2075-4418/13/8/1380',
         'lee2017curated': 'https://www.nature.com/articles/sdata2017177',
         'geiger2012we': 'http://www.cvlibs.net/publications/Geiger2012CVPR.pdf',
         'bergmann2019mvtec': 'https://www.mvtec.com/company/research/datasets/mvtec-ad',
