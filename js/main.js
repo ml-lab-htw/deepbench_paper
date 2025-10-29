@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const useCaseDescription = document.getElementById('usecase-description');
     const useCaseThumbnailContainer = document.getElementById('usecase-thumbnail-container');
     const useCaseDescriptionBox = document.getElementById('usecase-description-box');
+    const filterToggle = document.getElementById('filter-by-corruption');
+    const plotContextLabel = document.getElementById('plot-context-label');
 
     // --- DATA ---
     const corruptions = [
@@ -70,6 +72,11 @@ document.addEventListener('DOMContentLoaded', () => {
         'Shadow': 'Adds synthetic shadows to an image to simulate lighting conditions.', 'MotionBlur': 'Blurs the image to simulate movement, as if the camera or object was in motion.',
         'GridDistortion': 'Distorts the image by applying a grid-like warping effect, bending specific areas.', 'GridElasticDeformation': 'Applies a rubber-sheet-like deformation to the image, bending it smoothly.',
         'PerspectiveTransformation': 'Warps images by changing its perspective, as if viewed from a different angle.', 'CloudGenerator': 'Overlays or generates cloud-like textures in the image, simulating an overcast sky.'
+    };
+
+    // Map logical corruption names to filenames used in plots (if they differ)
+    const plotCorruptionNameMap = {
+        'ImageFlip': 'Flip'
     };
 
     // --- HELPERS ---
@@ -140,10 +147,64 @@ document.addEventListener('DOMContentLoaded', () => {
     function updatePlotsView() {
         const accImg = document.getElementById('acc-plot');
         const flipImg = document.getElementById('flip-plot');
-        accImg.src = `assets/experiments/main/acc_${currentUseCase}.png`;
-        accImg.alt = `Balanced accuracy for ${humanizeCamelCase(currentUseCase)}`;
-        flipImg.src = `assets/experiments/main/flip_${currentUseCase}.png`;
-        flipImg.alt = `Label flip plot for ${humanizeCamelCase(currentUseCase)}`;
+        const uc = currentUseCase;
+        const corr = currentCorruption;
+        const corrForFile = plotCorruptionNameMap[corr] || corr;
+
+        const combinedAcc = `assets/experiments/main/acc_${uc}.png`;
+        const combinedFlip = `assets/experiments/main/flip_${uc}.png`;
+        const perCorrAcc = `assets/experiments/main/acc_${uc}_${corrForFile}.png`;
+        const perCorrFlip = `assets/experiments/main/flip_${uc}_${corrForFile}.png`;
+
+        const showPerCorruption = !!(filterToggle && filterToggle.checked);
+
+        // Helper: apply src with one-time fallback
+        function setWithFallback(img, primary, fallback, altPrimary, altFallback) {
+            img.onerror = null; // reset any previous handler
+            img.src = primary;
+            img.alt = altPrimary;
+            img.onerror = () => {
+                img.onerror = null; // avoid loops
+                img.src = fallback;
+                img.alt = altFallback;
+            };
+        }
+
+        if (showPerCorruption) {
+            setWithFallback(
+                accImg,
+                perCorrAcc,
+                combinedAcc,
+                `Balanced accuracy for ${humanizeCamelCase(uc)} — ${humanizeCamelCase(corr)}`,
+                `Balanced accuracy for ${humanizeCamelCase(uc)} (combined)`
+            );
+            setWithFallback(
+                flipImg,
+                perCorrFlip,
+                combinedFlip,
+                `Label flip probability for ${humanizeCamelCase(uc)} — ${humanizeCamelCase(corr)}`,
+                `Label flip probability for ${humanizeCamelCase(uc)} (combined)`
+            );
+        } else {
+            // Combined only
+            accImg.onerror = null;
+            flipImg.onerror = null;
+            accImg.src = combinedAcc;
+            accImg.alt = `Balanced accuracy for ${humanizeCamelCase(uc)} (combined)`;
+            flipImg.src = combinedFlip;
+            flipImg.alt = `Label flip probability for ${humanizeCamelCase(uc)} (combined)`;
+        }
+
+        updatePlotContextLabel(showPerCorruption, uc, corr);
+    }
+
+    function updatePlotContextLabel(showPerCorruption, uc, corr) {
+        if (!plotContextLabel) return;
+        if (showPerCorruption) {
+            plotContextLabel.textContent = `Showing: ${humanizeCamelCase(uc)} — ${humanizeCamelCase(corr)}`;
+        } else {
+            plotContextLabel.textContent = '';
+        }
     }
 
     // Measure tallest description across use cases and fix the box height
@@ -213,6 +274,14 @@ document.addEventListener('DOMContentLoaded', () => {
             useCaseThumbnailContainer.appendChild(thumb);
         });
 
+        // Restore persisted toggle
+        if (filterToggle) {
+            const saved = localStorage.getItem('filterByCorruption');
+            if (saved === '1' || saved === '0') {
+                filterToggle.checked = saved === '1';
+            }
+        }
+
         // 3. Create Plot Elements
         plotsContainer.innerHTML = '';
 
@@ -234,7 +303,15 @@ document.addEventListener('DOMContentLoaded', () => {
         flipImg.onerror = () => { flipImg.alt = 'Plot not available.'; };
         plotsContainer.appendChild(flipImg);
 
-        // 4. Initial selection highlight and content
+        // 4. Attach toggle handler
+        if (filterToggle) {
+            filterToggle.addEventListener('change', () => {
+                localStorage.setItem('filterByCorruption', filterToggle.checked ? '1' : '0');
+                updatePlotsView();
+            });
+        }
+
+        // 5. Initial selection highlight and content
         updateAllViews();
     }
 

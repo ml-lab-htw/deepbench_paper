@@ -243,6 +243,19 @@ a:hover {
     margin-bottom: 2rem;
 }
 
+.plot-options {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0.5rem 0 0.5rem 0;
+    justify-content: center;
+}
+
+.plot-context-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
 
 /* Social Links */
 .social-links {
