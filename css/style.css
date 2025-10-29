@@ -89,6 +89,27 @@ a:hover {
     margin-bottom: 2rem;
 }
 
+#usecase-thumbnail-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Fixed-height invisible box for description to avoid layout jumps */
+#usecase-description-box {
+    overflow: hidden; /* keep layout stable, no scrollbars */
+    min-height: 80px; /* initial fallback to reduce first-render jump */
+    transition: height 0.2s ease; /* smooth adjustment on resize recompute */
+    margin-bottom: 0.5rem;
+}
+
+#usecase-description {
+    margin: 0; /* normalize spacing inside the box */
+}
+
 .thumbnail {
     width: 80px;
     height: 80px;
@@ -210,6 +231,16 @@ a:hover {
     border-radius: 4px;
     box-sizing: border-box;
     margin-bottom: 2rem; /* Add space between stacked plots */
+}
+
+/* Ensure embedded PDF plots are visible and styled like images */
+.plot-embed {
+    width: 100%;
+    height: 520px; /* visible height for PDFs */
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    box-sizing: border-box;
+    margin-bottom: 2rem;
 }
 
 

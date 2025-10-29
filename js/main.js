@@ -11,6 +11,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabsContainer = document.querySelector('.tabs');
     const plotsContainer = document.getElementById('plots-container');
     const datasetSourceContent = document.getElementById('dataset-source-content');
+    const useCaseTypeHeading = document.getElementById('usecase-type-heading');
+    const useCaseDescription = document.getElementById('usecase-description');
+    const useCaseThumbnailContainer = document.getElementById('usecase-thumbnail-container');
+    const useCaseDescriptionBox = document.getElementById('usecase-description-box');
 
     // --- DATA ---
     const corruptions = [
@@ -68,16 +72,37 @@ document.addEventListener('DOMContentLoaded', () => {
         'PerspectiveTransformation': 'Warps images by changing its perspective, as if viewed from a different angle.', 'CloudGenerator': 'Overlays or generates cloud-like textures in the image, simulating an overcast sky.'
     };
 
+    // --- HELPERS ---
+    function humanizeCamelCase(name) {
+        return name.replace(/([A-Z])/g, ' $1').trim();
+    }
+
+    function applyCitations(content) {
+        if (!content) return '';
+        return content.replace(/~\\(cite|citep)\{([^}]+)}/g, (match, command, key) => {
+            const url = citationData[key];
+            if (url) {
+                const year = (key.match(/\d{4}/) || [''])[0];
+                const author = key.replace(/\d{4}.*/, '');
+                const linkText = `[${author.charAt(0).toUpperCase() + author.slice(1)}, ${year}]`;
+                return ` <a href="${url}" target="_blank" class="citation-link">${linkText}</a>`;
+            }
+            return ` [${key}]`;
+        });
+    }
+
     // --- UPDATE FUNCTIONS ---
     function updateAllViews() {
         updateLargeImageView();
         updatePlotsView();
         updateDatasetSourceView();
+        updateUseCaseSelectionView();
+        lockUseCaseDescriptionHeight();
     }
 
     function updateLargeImageView() {
         // Update heading and description
-        const corruptionName = currentCorruption.replace(/([A-Z])/g, ' $1').trim();
+        const corruptionName = humanizeCamelCase(currentCorruption);
         corruptionTypeHeading.innerHTML = `Selected: <strong>${corruptionName}</strong>`;
         corruptionDescription.textContent = corruptionDescriptions[currentCorruption] || '';
 
@@ -90,30 +115,81 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function updatePlotsView() {
-        const accPlot = document.getElementById('acc-plot');
-        const flipPlot = document.getElementById('flip-plot');
-        accPlot.src = `assets/experiments/main/acc_${currentUseCase}.png`;
-        flipPlot.src = `assets/experiments/main/flip_${currentUseCase}.png`;
+    function updateUseCaseSelectionView() {
+        const useCaseName = humanizeCamelCase(currentUseCase);
+        useCaseTypeHeading.innerHTML = `Selected: <strong>${useCaseName}</strong>`;
+
+        let content = datasetSources[currentUseCase] || '';
+        content = applyCitations(content);
+        useCaseDescription.innerHTML = content || 'Description not available.';
+
+        // Update active use case thumbnail
+        document.querySelectorAll('#usecase-thumbnail-container .thumbnail').forEach(thumb => {
+            thumb.classList.toggle('active', thumb.dataset.usecase === currentUseCase);
+        });
     }
 
     function updateDatasetSourceView() {
-        let content = datasetSources[currentUseCase] || 'Source information not available.';
+        let content = datasetSources[currentUseCase] || '';
+        content = applyCitations(content);
+        if (datasetSourceContent) {
+            datasetSourceContent.innerHTML = content;
+        }
+    }
 
-        // Replace citations like ~\citep{key} or ~\cite{key}
-        content = content.replace(/~\\(cite|citep)\{([^}]+)\}/g, (match, command, key) => {
-            const url = citationData[key];
-            if (url) {
-                const year = key.match(/\d{4}/);
-                const author = key.replace(/\d{4}.*/, '');
-                const linkText = `[${author.charAt(0).toUpperCase() + author.slice(1)}, ${year}]`;
-                return ` <a href="${url}" target="_blank" class="citation-link">${linkText}</a>`;
-            }
-            return ` [${key}]`; // Fallback if no URL is found
+    function updatePlotsView() {
+        const accImg = document.getElementById('acc-plot');
+        const flipImg = document.getElementById('flip-plot');
+        accImg.src = `assets/experiments/main/acc_${currentUseCase}.png`;
+        accImg.alt = `Balanced accuracy for ${humanizeCamelCase(currentUseCase)}`;
+        flipImg.src = `assets/experiments/main/flip_${currentUseCase}.png`;
+        flipImg.alt = `Label flip plot for ${humanizeCamelCase(currentUseCase)}`;
+    }
+
+    // Measure tallest description across use cases and fix the box height
+    function lockUseCaseDescriptionHeight() {
+        if (!useCaseDescriptionBox) return;
+
+        // Create a hidden measurer with the same width
+        const measurer = document.createElement('div');
+        measurer.style.visibility = 'hidden';
+        measurer.style.position = 'absolute';
+        measurer.style.left = '-9999px';
+        measurer.style.top = '0';
+        // Match width to current box width to reflect wrapping at this breakpoint
+        const targetWidth = useCaseDescriptionBox.clientWidth || useCaseDescriptionBox.offsetWidth || 600;
+        measurer.style.width = targetWidth + 'px';
+        // Inherit font styles from body/section
+        measurer.style.fontFamily = getComputedStyle(useCaseDescriptionBox).fontFamily;
+        measurer.style.fontSize = getComputedStyle(useCaseDescriptionBox).fontSize;
+        measurer.style.lineHeight = getComputedStyle(useCaseDescriptionBox).lineHeight;
+        document.body.appendChild(measurer);
+
+        let maxH = 0;
+        useCases.forEach(uc => {
+            const raw = datasetSources[uc] || '';
+            const html = applyCitations(raw);
+            measurer.innerHTML = `<p style="margin:0">${html}</p>`;
+            const h = measurer.offsetHeight;
+            if (h > maxH) maxH = h;
         });
 
-        datasetSourceContent.innerHTML = content;
+        document.body.removeChild(measurer);
+        if (maxH > 0) {
+            useCaseDescriptionBox.style.height = maxH + 'px';
+        }
     }
+
+    // Debounced resize handler to recompute height when layout width changes
+    let resizeTimer = null;
+    window.addEventListener('resize', () => {
+        if (resizeTimer) clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            // reset height to allow recalculation under new width
+            useCaseDescriptionBox.style.height = 'auto';
+            lockUseCaseDescriptionHeight();
+        }, 150);
+    });
 
     // --- INITIALIZATION ---
     function initialize() {
@@ -126,53 +202,39 @@ document.addEventListener('DOMContentLoaded', () => {
             topThumbnailContainer.appendChild(thumbnail);
         });
 
-        // 2. Create Use Case Tabs (Experiments)
+        // 2. Create Use Case Thumbnails (Experiments)
+        if (tabsContainer) tabsContainer.innerHTML = '';
+        useCaseThumbnailContainer.innerHTML = '';
         useCases.forEach(useCase => {
-            const tab = document.createElement('div');
-            tab.classList.add('tab');
-            tab.dataset.usecase = useCase;
-
-            const tabImg = document.createElement('img');
-            tabImg.src = `assets/experiments/usecases/${useCase}_1.png`;
-            tab.appendChild(tabImg);
-
-            const tabSpan = document.createElement('span');
-            tabSpan.textContent = useCase.replace(/([A-Z])/g, ' $1').trim();
-            tab.appendChild(tabSpan);
-
-            tab.addEventListener('click', () => {
+            const thumb = createUseCaseThumbnail(useCase, () => {
                 currentUseCase = useCase;
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
                 updateAllViews();
             });
-
-            tabsContainer.appendChild(tab);
+            useCaseThumbnailContainer.appendChild(thumb);
         });
 
         // 3. Create Plot Elements
-        plotsContainer.innerHTML = ''; // Clear previous plots
+        plotsContainer.innerHTML = '';
 
         const accTitle = document.createElement('h3');
         accTitle.textContent = 'Balanced Accuracy';
         plotsContainer.appendChild(accTitle);
 
-        const accPlot = document.createElement('img');
-        accPlot.id = 'acc-plot';
-        accPlot.onerror = () => { accPlot.src = ''; accPlot.alt = 'Plot not available.'; };
-        plotsContainer.appendChild(accPlot);
+        const accImg = document.createElement('img');
+        accImg.id = 'acc-plot';
+        accImg.onerror = () => { accImg.alt = 'Plot not available.'; };
+        plotsContainer.appendChild(accImg);
 
         const flipTitle = document.createElement('h3');
         flipTitle.textContent = 'Label Flip Probability';
         plotsContainer.appendChild(flipTitle);
 
-        const flipPlot = document.createElement('img');
-        flipPlot.id = 'flip-plot';
-        flipPlot.onerror = () => { flipPlot.src = ''; flipPlot.alt = 'Plot not available.'; };
-        plotsContainer.appendChild(flipPlot);
+        const flipImg = document.createElement('img');
+        flipImg.id = 'flip-plot';
+        flipImg.onerror = () => { flipImg.alt = 'Plot not available.'; };
+        plotsContainer.appendChild(flipImg);
 
-        // 4. Set Initial State
-        document.querySelector('.tab').classList.add('active');
+        // 4. Initial selection highlight and content
         updateAllViews();
     }
 
@@ -190,6 +252,21 @@ document.addEventListener('DOMContentLoaded', () => {
             thumbnail.onerror = null;
         };
 
+        thumbnail.addEventListener('click', onClick);
+        return thumbnail;
+    }
+
+    function createUseCaseThumbnail(useCaseName, onClick) {
+        const thumbnail = document.createElement('img');
+        thumbnail.classList.add('thumbnail');
+        thumbnail.dataset.usecase = useCaseName;
+        thumbnail.alt = `Thumbnail for ${useCaseName}`;
+        thumbnail.src = `assets/experiments/usecases/${useCaseName}_1.png`;
+        thumbnail.onerror = () => {
+            // Fallback to non-indexed name if available; otherwise clear
+            thumbnail.src = `assets/experiments/usecases/${useCaseName}.png`;
+            thumbnail.onerror = () => { thumbnail.removeAttribute('src'); thumbnail.alt = 'Example not available.'; };
+        };
         thumbnail.addEventListener('click', onClick);
         return thumbnail;
     }
