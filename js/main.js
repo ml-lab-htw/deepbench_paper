@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentCorruption = 'Brightness';
     let currentUseCase = 'AutonomousDriving';
 
+    // --- STATE (Specialists) ---
+    let currentSpecialistsDomain = 'MedicalDiagnosis';
+
     // --- DOM ELEMENTS ---
     const largeImage = document.getElementById('large-image');
     const corruptionTypeHeading = document.getElementById('corruption-type-heading');
@@ -17,6 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const useCaseDescriptionBox = document.getElementById('usecase-description-box');
     const filterToggle = document.getElementById('filter-by-corruption');
     const plotContextLabel = document.getElementById('plot-context-label');
+
+    // --- DOM (Specialists) ---
+    const specialistsHeading = document.getElementById('specialists-type-heading');
+    const specialistsThumbs = document.getElementById('specialists-thumbnail-container');
+    const specialistsAccImg = document.getElementById('specialists-acc-plot');
+    const specialistsFlipImg = document.getElementById('specialists-flip-plot');
 
     // --- DATA ---
     const corruptions = [
@@ -55,6 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'AutonomousDriving', 'Handheld', 'ManufacturingQuality',
         'MedicalDiagnosis', 'PeopleRecognition', 'SatelliteImaging'
     ];
+
+    const specialistsDomains = ['MedicalDiagnosis', 'SatelliteImaging'];
 
     const thumbnailFileMap = {
         'Brightness': 'Brightness_-60.png', 'CloudGenerator': 'CloudGenerator_0.5.png', 'Contrast': 'Contrast_1.5.png',
@@ -194,6 +205,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const showPerCorruption = !!(filterToggle && filterToggle.checked);
         let anyFallbackUsed = false;
 
+        // Toggle side-by-side layout when showing per-corruption
+        if (plotsContainer) {
+            plotsContainer.classList.toggle('side-by-side', showPerCorruption);
+        }
+
         // Helper: apply src with one-time fallback, set flag and label on fallback
         function setWithFallback(img, primary, fallback, altPrimary, altFallback) {
             img.onerror = null; // reset any previous handler
@@ -327,23 +343,29 @@ document.addEventListener('DOMContentLoaded', () => {
         // 3. Create Plot Elements
         plotsContainer.innerHTML = '';
 
+        // Accuracy block
+        const accBlock = document.createElement('div');
+        accBlock.className = 'plot-block';
         const accTitle = document.createElement('h3');
         accTitle.textContent = 'Balanced Accuracy';
-        plotsContainer.appendChild(accTitle);
-
         const accImg = document.createElement('img');
         accImg.id = 'acc-plot';
         accImg.onerror = () => { accImg.alt = 'Plot not available.'; };
-        plotsContainer.appendChild(accImg);
+        accBlock.appendChild(accTitle);
+        accBlock.appendChild(accImg);
+        plotsContainer.appendChild(accBlock);
 
+        // Flip block
+        const flipBlock = document.createElement('div');
+        flipBlock.className = 'plot-block';
         const flipTitle = document.createElement('h3');
         flipTitle.textContent = 'Label Flip Probability';
-        plotsContainer.appendChild(flipTitle);
-
         const flipImg = document.createElement('img');
         flipImg.id = 'flip-plot';
         flipImg.onerror = () => { flipImg.alt = 'Plot not available.'; };
-        plotsContainer.appendChild(flipImg);
+        flipBlock.appendChild(flipTitle);
+        flipBlock.appendChild(flipImg);
+        plotsContainer.appendChild(flipBlock);
 
         // 4. Attach toggle handler
         if (filterToggle) {
@@ -390,5 +412,72 @@ document.addEventListener('DOMContentLoaded', () => {
         return thumbnail;
     }
 
+    // --- SPECIALISTS HELPERS/UPDATERS ---
+    function displayNameForDomain(domainKey) {
+        if (domainKey === 'MedicalDiagnosis') return 'Medical';
+        if (domainKey === 'SatelliteImaging') return 'Satellite';
+        return humanizeCamelCase(domainKey);
+    }
+
+    function updateSpecialistsPlots() {
+        if (!specialistsAccImg || !specialistsFlipImg) return;
+        const dom = currentSpecialistsDomain;
+        specialistsAccImg.src = `assets/experiments/specialists/acc_${dom}.png`;
+        specialistsAccImg.alt = `Balanced accuracy (specialists) for ${displayNameForDomain(dom)}`;
+        specialistsAccImg.onerror = () => { specialistsAccImg.alt = 'Plot not available.'; };
+
+        specialistsFlipImg.src = `assets/experiments/specialists/flip_${dom}.png`;
+        specialistsFlipImg.alt = `Label flip probability (specialists) for ${displayNameForDomain(dom)}`;
+        specialistsFlipImg.onerror = () => { specialistsFlipImg.alt = 'Plot not available.'; };
+    }
+
+    function updateSpecialistsHeading() {
+        if (!specialistsHeading) return;
+        specialistsHeading.innerHTML = `Selected: <strong>${displayNameForDomain(currentSpecialistsDomain)}</strong>`;
+    }
+
+    function updateSpecialistsActiveThumb() {
+        if (!specialistsThumbs) return;
+        specialistsThumbs.querySelectorAll('.thumbnail').forEach(img => {
+            img.classList.toggle('active', img.dataset.domain === currentSpecialistsDomain);
+        });
+    }
+
+    function updateSpecialistsView() {
+        updateSpecialistsHeading();
+        updateSpecialistsActiveThumb();
+        updateSpecialistsPlots();
+    }
+
+    function createSpecialistThumbnail(domainKey, onClick) {
+        const img = document.createElement('img');
+        img.classList.add('thumbnail');
+        img.dataset.domain = domainKey;
+        img.alt = `Thumbnail for ${displayNameForDomain(domainKey)}`;
+        // Reuse existing use-case thumbnails
+        img.src = `assets/experiments/usecases/${domainKey}_1.png`;
+        img.onerror = () => {
+            img.src = `assets/experiments/usecases/${domainKey}.png`;
+            img.onerror = () => { img.removeAttribute('src'); img.alt = 'Example not available.'; };
+        };
+        img.addEventListener('click', onClick);
+        return img;
+    }
+
+    function initializeSpecialists() {
+        if (!specialistsThumbs) return;
+        specialistsThumbs.innerHTML = '';
+        specialistsDomains.forEach(dom => {
+            const thumb = createSpecialistThumbnail(dom, () => {
+                currentSpecialistsDomain = dom;
+                updateSpecialistsView();
+            });
+            specialistsThumbs.appendChild(thumb);
+        });
+        updateSpecialistsView();
+    }
+
+    // Kick off base and specialists sections
     initialize();
+    initializeSpecialists();
 });

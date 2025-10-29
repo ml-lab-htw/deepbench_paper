@@ -65,6 +65,22 @@
             </div>
         </section>
 
+        <!-- New: Experiment 3 - Specialists -->
+        <section id="experiments-specialists">
+            <h2>Is Domain-Specific Fine-Tuning Beneficial for Robustness?</h2>
+            <p class="exp-summary"><strong>Answer:</strong> Fine-tuning on a specific domain can boost clean performance on that modality but may reduce robustness to corruptions. <strong>Setup:</strong> We compare general-purpose VLMs to domain-specialized variants in two domains—Medical and Satellite—using their respective corruption sets, reporting clean accuracy and flip-based robustness.</p>
+
+            <h3 id="specialists-type-heading"></h3>
+            <div id="specialists-thumbnail-container"></div>
+
+            <div id="specialists-plots">
+                <h3>Balanced Accuracy</h3>
+                <img id="specialists-acc-plot" alt="Specialists balanced accuracy plot">
+                <h3>Label Flip Probability</h3>
+                <img id="specialists-flip-plot" alt="Specialists label flip plot">
+            </div>
+        </section>
+
         <section id="citation">
             <h2>How to Cite</h2>
             <pre><code>@misc{koddenbrock2025deepbench,

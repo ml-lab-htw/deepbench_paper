@@ -98,6 +98,15 @@ a:hover {
     margin-bottom: 1rem;
 }
 
+#specialists-thumbnail-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
 /* Fixed-height invisible box for description to avoid layout jumps */
 #usecase-description-box {
     overflow: hidden; /* keep layout stable, no scrollbars */
@@ -243,19 +252,29 @@ a:hover {
     margin-bottom: 2rem;
 }
 
-.plot-options {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin: 0.5rem 0 0.5rem 0;
-    justify-content: center;
+/* Side-by-side layout for plots when per-corruption filter is active */
+#plots-container.side-by-side {
+    display: grid;
+    grid-template-columns: 1fr; /* default to stacked on very small screens */
+    gap: 1rem 1.25rem; /* row gap, column gap */
+    text-align: left; /* better alignment for headings in grid */
 }
 
-.plot-context-label {
-    font-size: 0.9rem;
-    color: #6c757d;
+#plots-container.side-by-side h3 {
+    margin: 0 0 0.5rem 0; /* tighter spacing above images */
 }
 
+#plots-container.side-by-side img,
+#plots-container.side-by-side .plot-embed {
+    margin: 0; /* grid gap controls spacing */
+}
+
+@media (min-width: 768px) {
+    #plots-container.side-by-side {
+        grid-template-columns: repeat(2, 1fr);
+        align-items: start;
+    }
+}
 
 /* Social Links */
 .social-links {
@@ -287,4 +306,20 @@ a:hover {
 .exp-summary {
     margin: 0.5rem 0 1rem 0;
     color: #495057;
+}
+
+#specialists-plots {
+    display: block;
+    margin-top: 1rem;
+    text-align: center;
+}
+
+#specialists-plots img {
+    max-width: 100%;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    box-sizing: border-box;
+    margin-bottom: 2rem;
 }
