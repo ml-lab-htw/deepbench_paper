@@ -107,7 +107,11 @@
 
         <section id="experiments-correlation">
             <h2>RQ6: Can Robustness Be Reliably Evaluated Without Labeled Data?</h2>
-            <p class="exp-summary" data-exp="correlation"><strong>Answer:</strong> Yes, label flip probability (LFP) is a reliable proxy for robustness, correlating strongly with balanced accuracy across all tested domains.</p>
+            <p class="exp-summary" data-exp="correlation">
+                <strong>Answer:</strong> Yes, label flip probability (LFP) is a reliable proxy for robustness, correlating strongly with balanced accuracy across all tested domains.
+                <strong>Setup:</strong> We evaluate five pretrained VLMs across six domains using domain-specific corruptions, comparing supervised balanced accuracy (Acc) to unsupervised LFP per corruption and severity, and compute Pearson correlation between Acc and LFP.
+                <strong>Results:</strong> Across all model–domain–corruption combinations, Acc and LFP show a strong inverse correlation (global r ≈ −0.90). Correlations are consistently negative across domains (median r ≈ −0.92) and strongest in Driving and Satellite (r ≈ −0.99), confirming LFP as a robust label-free proxy.
+            </p>
             <div class="experiment" data-exp="correlation"></div>
         </section>
 

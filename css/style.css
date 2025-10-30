@@ -57,8 +57,8 @@ h2 {
 }
 
 .thumbnail {
-  width: 80px;
-  height: 80px;
+  width: 64px;
+  height: 64px;
   object-fit: cover;
   cursor: pointer;
   border: 2px solid transparent;
@@ -145,6 +145,12 @@ h2 {
 
 .exp-summary {
   color: #495057;
+}
+
+/* Put Setup and Results on new lines in experiment summaries */
+.exp-summary strong:not(:first-of-type) {
+  display: block;
+  margin-top: 0.35rem;
 }
 
 #large-image-container {
@@ -387,4 +393,9 @@ body.coming-soon-active #coming-soon-overlay .coming-soon-content {
 .experiment [id$="-usecase-type-heading"],
 .experiment [id$="-usecase-description-box"] {
   display: none !important;
+}
+
+#corruptions-gallery .thumbnail-container.is-stuck .thumbnail {
+  width: 32px;   /* 50% of 64px */
+  height: 32px;
 }
