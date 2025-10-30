@@ -899,6 +899,12 @@ function setupStickyThumbnailsAcrossExperiments() {
             const h = headerEl ? headerEl.getBoundingClientRect().height : 0;
             bar.style.top = `${Math.max(0, h)}px`;
         }
+        function updateScrollOffsetsVars(isStuck) {
+            const h = headerEl ? headerEl.getBoundingClientRect().height : 0;
+            document.documentElement.style.setProperty('--header-offset', `${Math.round(h)}px`);
+            const tb = isStuck ? bar.offsetHeight : 0;
+            document.documentElement.style.setProperty('--thumbbar-offset', `${Math.round(tb)}px`);
+        }
 
         function onScroll() {
             // Toggle header shrink state
@@ -929,12 +935,17 @@ function setupStickyThumbnailsAcrossExperiments() {
                     removeSpacer();
                 }
             }
+            updateScrollOffsetsVars(bar.classList.contains('is-stuck'));
         }
         const onResize = () => {
             if (bar.classList.contains('is-stuck')) updateBarWidthPosition();
+            updateScrollOffsetsVars(bar.classList.contains('is-stuck'));
             onScroll();
         };
 
         window.addEventListener('scroll', onScroll, { passive: true });
         window.addEventListener('resize', onResize);
+        // initial
+        onScroll();
+        updateScrollOffsetsVars(false);
     }
