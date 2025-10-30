@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <img id="${expKey}-acc-plot" alt="Balanced accuracy plot">
             </div>
             <div class="plot-block">
-                <h3>Label Flip Probability</h3>
+                <h3 id="${expKey}-second-plot-title">Label Flip Probability</h3>
                 <img id="${expKey}-flip-plot" alt="Label flip probability plot">
             </div>
         `;
@@ -196,6 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const plotContextLabelLocal = document.getElementById(`${expKey}-plot-context-label`);
         const plotsContainerLocal = document.getElementById(`${expKey}-plots-container`);
         const descBoxEl = document.getElementById(`${expKey}-usecase-description-box`);
+        const secondPlotTitleEl = document.getElementById(`${expKey}-second-plot-title`);
 
         // Determine which use cases to show for this experiment
         const ucList = (expKey === 'specialists')
@@ -245,10 +246,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const corr = currentCorruption;
             const corrForFile = plotCorruptionNameMap[corr] || corr;
 
+            // Configure second plot depending on experiment
+            const secondPrefix = (expKey === 'pretraining') ? 'mce' : 'flip';
+            const secondTitle = (expKey === 'pretraining') ? 'Mean Corruption Error (MCE)' : 'Label Flip Probability';
+            if (secondPlotTitleEl) secondPlotTitleEl.textContent = secondTitle;
+
             const combinedAcc = `${basePath}/acc_${currentUC}.png`;
-            const combinedFlip = `${basePath}/flip_${currentUC}.png`;
             const perCorrAcc = `${basePath}/acc_${currentUC}_${corrForFile}.png`;
-            const perCorrFlip = `${basePath}/flip_${currentUC}_${corrForFile}.png`;
+
+            const combinedSecond = `${basePath}/${secondPrefix}_${currentUC}.png`;
+            const perCorrSecond = `${basePath}/${secondPrefix}_${currentUC}_${corrForFile}.png`;
+
+            // Optional alternate prefix fallback (e.g., use flip when mce missing)
+            const altSecondPrefix = (secondPrefix === 'mce') ? 'flip' : null;
+            const combinedSecondAlt = altSecondPrefix ? `${basePath}/${altSecondPrefix}_${currentUC}.png` : null;
+            const perCorrSecondAlt = altSecondPrefix ? `${basePath}/${altSecondPrefix}_${currentUC}_${corrForFile}.png` : null;
 
             const showPerCorruption = !!(filterToggle && filterToggle.checked);
             let anyFallbackUsed = false;
@@ -269,7 +281,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
             }
 
+            function setWithMultiFallback(imgEl, sources, alts) {
+                let idx = 0;
+                function tryNext() {
+                    if (idx >= sources.length) return;
+                    imgEl.onerror = () => {
+                        idx++;
+                        anyFallbackUsed = true;
+                        updatePlotContextLabelLocal(showPerCorruption, anyFallbackUsed);
+                        tryNext();
+                    };
+                    imgEl.src = sources[idx];
+                    imgEl.alt = alts[idx] || '';
+                }
+                tryNext();
+            }
+
             if (showPerCorruption) {
+                // accuracy plot
                 setWithFallback(
                     accImg,
                     perCorrAcc,
@@ -277,20 +306,51 @@ document.addEventListener('DOMContentLoaded', () => {
                     `Balanced accuracy for ${humanizeCamelCase(currentUC)} — ${humanizeCamelCase(corr)}`,
                     `Balanced accuracy for ${humanizeCamelCase(currentUC)} (combined)`
                 );
-                setWithFallback(
-                    flipImg,
-                    perCorrFlip,
-                    combinedFlip,
-                    `Label flip probability for ${humanizeCamelCase(currentUC)} — ${humanizeCamelCase(corr)}`,
-                    `Label flip probability for ${humanizeCamelCase(currentUC)} (combined)`
-                );
+
+                // second plot with richer fallbacks for pretraining
+                if (expKey === 'pretraining') {
+                    const sources = [perCorrSecond, combinedSecond];
+                    const alts = [
+                        `${secondTitle} for ${humanizeCamelCase(currentUC)} — ${humanizeCamelCase(corr)}`,
+                        `${secondTitle} for ${humanizeCamelCase(currentUC)} (combined)`
+                    ];
+                    if (perCorrSecondAlt) {
+                        sources.push(perCorrSecondAlt);
+                        alts.push(`Label Flip Probability for ${humanizeCamelCase(currentUC)} — ${humanizeCamelCase(corr)}`);
+                    }
+                    if (combinedSecondAlt) {
+                        sources.push(combinedSecondAlt);
+                        alts.push(`Label Flip Probability for ${humanizeCamelCase(currentUC)} (combined)`);
+                    }
+                    setWithMultiFallback(flipImg, sources, alts);
+                } else {
+                    setWithFallback(
+                        flipImg,
+                        perCorrSecond,
+                        combinedSecond,
+                        `${secondTitle} for ${humanizeCamelCase(currentUC)} — ${humanizeCamelCase(corr)}`,
+                        `${secondTitle} for ${humanizeCamelCase(currentUC)} (combined)`
+                    );
+                }
             } else {
                 accImg.onerror = null;
-                flipImg.onerror = null;
                 accImg.src = combinedAcc;
                 accImg.alt = `Balanced accuracy for ${humanizeCamelCase(currentUC)} (combined)`;
-                flipImg.src = combinedFlip;
-                flipImg.alt = `Label flip probability for ${humanizeCamelCase(currentUC)} (combined)`;
+
+                if (expKey === 'pretraining') {
+                    // Try combined MCE then combined flip as fallback
+                    const sources = [combinedSecond];
+                    const alts = [`${secondTitle} for ${humanizeCamelCase(currentUC)} (combined)`];
+                    if (combinedSecondAlt) {
+                        sources.push(combinedSecondAlt);
+                        alts.push(`Label Flip Probability for ${humanizeCamelCase(currentUC)} (combined)`);
+                    }
+                    setWithMultiFallback(flipImg, sources, alts);
+                } else {
+                    flipImg.onerror = null;
+                    flipImg.src = combinedSecond;
+                    flipImg.alt = `${secondTitle} for ${humanizeCamelCase(currentUC)} (combined)`;
+                }
             }
 
             updatePlotContextLabelLocal(showPerCorruption, anyFallbackUsed);
