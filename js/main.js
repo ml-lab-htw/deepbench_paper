@@ -334,8 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let maxInner = 0;
             useCases.forEach(uc => {
-                const txt = applyCitations(datasetSources[uc] || '');
-                p.innerHTML = txt;
+                p.innerHTML = applyCitations(datasetSources[uc] || '');
                 // Force reflow and measure
                 const h = p.offsetHeight;
                 if (h > maxInner) maxInner = h;
@@ -397,6 +396,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Ensure large image view is clipped properly on first render
         updateLargeImageView();
+
+        // Hook up citation copy button
+        const copyBtn = document.getElementById('copy-cite-btn');
+        const citeCode = document.getElementById('cite-bibtex');
+        if (copyBtn && citeCode) {
+            copyBtn.addEventListener('click', async () => {
+                const text = citeCode.textContent || '';
+                try {
+                    await navigator.clipboard.writeText(text);
+                    copyBtn.classList.add('copied');
+                    const prev = copyBtn.textContent;
+                    copyBtn.textContent = 'Copied!';
+                    setTimeout(() => { copyBtn.classList.remove('copied'); copyBtn.textContent = prev; }, 1200);
+                } catch (e) {
+                    // Fallback: select text
+                    const range = document.createRange();
+                    range.selectNodeContents(citeCode);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    try {
+                        document.execCommand('copy');
+                        copyBtn.classList.add('copied');
+                        const prev = copyBtn.textContent;
+                        copyBtn.textContent = 'Copied!';
+                        setTimeout(() => { copyBtn.classList.remove('copied'); copyBtn.textContent = prev; }, 1200);
+                    } finally {
+                        sel.removeAllRanges();
+                    }
+                }
+            });
+        }
     }
 
     // Kick off
