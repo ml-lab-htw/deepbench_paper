@@ -72,7 +72,7 @@
         </section>
 
         <section id="experiments-llm-selection">
-            <h2>Can LLMs Generate Consistent and Context-Aware Corruption Strategies?</h2>
+            <h2>RQ1: Can LLMs Generate Consistent and Context-Aware Corruption Strategies?</h2>
             <p class="exp-summary" data-exp="llm-selection"><strong>Answer:</strong> Yes, LLMs produce stable, context-aware corruption sets, enabling automated domain-specific robustness evaluation. <strong>Setup:</strong> We prompted GPT‑4o (temperature 0) with each domain description and the predefined corruption list, repeating 10 runs per domain. Final sets were chosen by majority vote and sanity-checked against simple domain-specific whitelist/blacklist rules. <strong>Results:</strong> Core transforms (Brightness, Contrast, ImageRotation) are selected reliably across domains, while domain-specific choices (e.g., CloudGenerator for Satellite, Rain for Driving) reflect contextual adaptation; all final sets satisfy whitelist/blacklist constraints.</p>
             <div class="plot-block">
                 <h3>Corruption Selection Frequencies (GPT‑4o)</h3>
@@ -81,31 +81,31 @@
         </section>
 
         <section id="experiments">
-            <h2>How Robust Are Foundation VLMs to Domain-Specific Corruptions?</h2>
+            <h2>RQ2: How Robust Are Foundation VLMs to Domain-Specific Corruptions?</h2>
             <p class="exp-summary" data-exp="main"><strong>Answer:</strong> No single VLM is universally robust. CLIP shows the strongest average corruption robustness, Gemma follows closely, and LLaVA achieves the lowest flip rate. Robustness still varies substantially across domains and corruption types, underscoring the need for domain-specific evaluation. <strong>Setup:</strong> We evaluate five pretrained VLMs (CLIP, SigLIP, ALIGN, LLaVA, Gemma) in zero-shot across six real-world domains, each with its domain-specific corruption set and multiple severity levels. We report balanced accuracy and label flip probability.</p>
             <div class="experiment" data-exp="main"></div>
         </section>
 
         <section id="experiments-specialists">
-            <h2>Is Domain-Specific Fine-Tuning Beneficial for Robustness?</h2>
+            <h2>RQ3: Is Domain-Specific Fine-Tuning Beneficial for Robustness?</h2>
             <p class="exp-summary" data-exp="specialists"><strong>Answer:</strong> Fine-tuning on a specific domain can boost clean performance on that modality but may reduce robustness to corruptions. <strong>Setup:</strong> We compare general-purpose VLMs to domain-specialized variants in two domains—Medical and Satellite—using their respective corruption sets, reporting clean accuracy and flip-based robustness.</p>
             <div class="experiment" data-exp="specialists"></div>
         </section>
 
         <section id="experiments-architecture">
-            <h2>How Does Model Architecture Affect Robustness?</h2>
+            <h2>RQ4: How Does Model Architecture Affect Robustness?</h2>
             <p class="exp-summary" data-exp="architecture"><strong>Answer:</strong> Transformer-based models with higher capacity tend to show stronger robustness to domain-specific corruptions; smaller patch sizes have mixed effects. <strong>Setup:</strong> We compare CLIP variants across architecture (ResNet vs. ViT), patch size, input resolution, and activation, all trained on the same OpenAI dataset. Models are evaluated across the six domains with their domain-specific corruption sets; we report balanced accuracy and label flip probability per domain and corruption.</p>
             <div class="experiment" data-exp="architecture"></div>
         </section>
 
         <section id="experiments-pretraining">
-            <h2>How Does Pretraining Data Influence Robustness?</h2>
+            <h2>RQ5: How Does Pretraining Data Influence Robustness?</h2>
             <p class="exp-summary" data-exp="pretraining"><strong>Answer:</strong> Curated, semantically aligned pretraining data yields higher accuracy and robustness than noisy corpora. <strong>Setup:</strong> Evaluate CLIP ViT-L/14 on five datasets: LAION-400M (Schuhmann et al., 2021), MetaCLIP FullCC (Xu et al., 2024), CommonPool, DataComp XL (Gadre et al., 2023), DFN2B (Fang et al., 2023), and OpenAI (Radford et al., 2021). Tested on six domains with domain-specific corruptions. <strong>Results:</strong> Curated models outperform noisy ones in accuracy and mean corruption error (mce).</p>
             <div class="experiment" data-exp="pretraining"></div>
         </section>
 
         <section id="experiments-correlation">
-            <h2>Can Robustness Be Reliably Evaluated Without Labeled Data?</h2>
+            <h2>RQ6: Can Robustness Be Reliably Evaluated Without Labeled Data?</h2>
             <p class="exp-summary" data-exp="correlation"><strong>Answer:</strong> Yes, label flip probability (LFP) is a reliable proxy for robustness, correlating strongly with balanced accuracy across all tested domains.</p>
             <div class="experiment" data-exp="correlation"></div>
         </section>
