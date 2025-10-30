@@ -197,10 +197,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const plotsContainerLocal = document.getElementById(`${expKey}-plots-container`);
         const descBoxEl = document.getElementById(`${expKey}-usecase-description-box`);
 
-        let currentUC = 'AutonomousDriving';
+        // Determine which use cases to show for this experiment
+        const ucList = (expKey === 'specialists')
+          ? ['MedicalDiagnosis', 'SatelliteImaging']
+          : useCases;
+
+        let currentUC = ucList[0];
 
         // build thumbnails for use cases
-        useCases.forEach(uc => {
+        ucList.forEach(uc => {
             const thumb = createUseCaseThumbnail(uc, () => {
                 currentUC = uc;
                 updateUseCaseHeading();
@@ -333,7 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.appendChild(measure);
 
             let maxInner = 0;
-            useCases.forEach(uc => {
+            ucList.forEach(uc => {
                 p.innerHTML = applyCitations(datasetSources[uc] || '');
                 // Force reflow and measure
                 const h = p.offsetHeight;
