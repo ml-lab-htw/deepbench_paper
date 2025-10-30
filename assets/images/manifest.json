@@ -1,0 +1,92 @@
+{
+  "Brightness": [
+    "Brightness_-30.png",
+    "Brightness_-90.png",
+    "Brightness_30.png",
+    "Brightness_150.png"
+  ],
+  "CloudGenerator": [
+    "CloudGenerator_30.png",
+    "CloudGenerator_45.png",
+    "CloudGenerator_60.png",
+    "CloudGenerator_75.png"
+  ],
+  "Contrast": [
+    "Contrast_-40.png",
+    "Contrast_0.png",
+    "Contrast_40.png",
+    "Contrast_240.png"
+  ],
+  "GaussianBlur": [
+    "GaussianBlur_32.png",
+    "GaussianBlur_56.png",
+    "GaussianBlur_80.png",
+    "GaussianBlur_100.png"
+  ],
+  "GaussianNoise": [
+    "GaussianNoise_32.png",
+    "GaussianNoise_56.png",
+    "GaussianNoise_80.png",
+    "GaussianNoise_100.png"
+  ],
+  "GlobalColourShift": [
+    "GlobalColourShift_-30.png",
+    "GlobalColourShift_30.png",
+    "GlobalColourShift_90.png",
+    "GlobalColourShift_120.png"
+  ],
+  "GridDistortion": [
+    "GridDistortion_32.png",
+    "GridDistortion_56.png",
+    "GridDistortion_80.png",
+    "GridDistortion_100.png"
+  ],
+  "GridElasticDeformation": [
+    "GridElasticDeformation_22.png",
+    "GridElasticDeformation_38.png",
+    "GridElasticDeformation_52.png",
+    "GridElasticDeformation_75.png"
+  ],
+  "ImageFlip": [
+    "ImageFlip_original.png",
+    "ImageFlip_horizontal.png",
+    "ImageFlip_vertical.png"
+  ],
+  "ImageRotation": [
+    "ImageRotation_-45.png",
+    "ImageRotation_0.png",
+    "ImageRotation_45.png",
+    "ImageRotation_90.png"
+  ],
+  "MotionBlur": [
+    "MotionBlur_32.png",
+    "MotionBlur_56.png",
+    "MotionBlur_80.png",
+    "MotionBlur_100.png"
+  ],
+  "PerspectiveTransformation": [
+    "PerspectiveTransformation_22.png",
+    "PerspectiveTransformation_37.png",
+    "PerspectiveTransformation_52.png",
+    "PerspectiveTransformation_75.png"
+  ],
+  "Rain": [
+    "Rain_90.png",
+    "Rain_150.png",
+    "Rain_280.png",
+    "Rain_360.png"
+  ],
+  "SaltPepperNoise": [
+    "SaltPepperNoise_8.png",
+    "SaltPepperNoise_14.png",
+    "SaltPepperNoise_20.png",
+    "SaltPepperNoise_25.png"
+  ],
+  "Shadow": [
+    "Shadow_32.png",
+    "Shadow_56.png",
+    "Shadow_80.png",
+    "Shadow_100.png"
+  ]
+}
+
