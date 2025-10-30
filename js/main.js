@@ -110,37 +110,48 @@
         corruptionTypeHeading.innerHTML = `Selected: <strong>${corruptionName}</strong>`;
         corruptionDescription.textContent = corruptionDescriptions[currentCorruption] || '';
 
-        // Render images from manifest or folder fallbacks
         const container = document.getElementById('large-image-container');
-        if (container) {
-            container.innerHTML = '';
+        if (!container) return;
+
+        // Render sequencing guard to avoid duplicate appends from overlapping async calls
+        window.__lbSeq = (window.__lbSeq || 0) + 1;
+        const seq = window.__lbSeq;
+        container.dataset.renderSeq = String(seq);
+
+        // Build list of sources using manifest, then fallbacks
+        const sources = [];
+        try {
             const manifest = await loadImagesManifest();
             const files = (manifest[currentCorruption] || []).slice(0, 4);
             if (files.length) {
-                files.forEach(file => {
-                    const img = document.createElement('img');
-                    img.src = `assets/images/${currentCorruption}/${file}`;
-                    img.alt = `${corruptionName} example`;
-                    img.onerror = () => { img.remove(); };
-                    container.appendChild(img);
-                });
+                files.forEach(file => sources.push(`assets/images/${currentCorruption}/${file}`));
             } else {
-                // Fallback: try to discover 1..4 pattern
-                ['1','2','3','4'].forEach(n => {
-                    const img = document.createElement('img');
-                    img.src = `assets/images/${currentCorruption}/${currentCorruption}_${n}.png`;
-                    img.alt = `${corruptionName} example`;
-                    img.onerror = () => { img.remove(); };
-                    container.appendChild(img);
-                });
+                ['1','2','3','4'].forEach(n => sources.push(`assets/images/${currentCorruption}/${currentCorruption}_${n}.png`));
             }
-            // Final fallback: top-level combined image if grid ended up empty
-            if (container.childElementCount === 0) {
-                const fallback = document.createElement('img');
-                fallback.src = `assets/images/${currentCorruption}.png`;
-                fallback.alt = `${corruptionName} example`;
-                container.appendChild(fallback);
-            }
+        } catch (e) {
+            ['1','2','3','4'].forEach(n => sources.push(`assets/images/${currentCorruption}/${currentCorruption}_${n}.png`));
+        }
+
+        // If a newer render started, abort
+        if (container.dataset.renderSeq !== String(seq)) return;
+
+        // Clear and append images
+        container.innerHTML = '';
+        let appended = 0;
+        for (const src of sources) {
+            const img = document.createElement('img');
+            img.src = src;
+            img.alt = `${corruptionName} example`;
+            img.onerror = () => { img.remove(); };
+            container.appendChild(img);
+            appended++;
+        }
+        // Final fallback if nothing appended
+        if (appended === 0) {
+            const fallback = document.createElement('img');
+            fallback.src = `assets/images/${currentCorruption}.png`;
+            fallback.alt = `${corruptionName} example`;
+            container.appendChild(fallback);
         }
 
         // Activate thumbnail state
@@ -539,18 +550,16 @@
             createExperimentSection({ expKey, container: expDiv, basePath });
         });
 
-        // Render Sources (BibTeX) once on load
-        renderSources();
-
-        // Removed: link-based Sources rendering; now handled by BibTeX renderer below.
+        // Removed duplicate renderSources call; handled on DOMContentLoaded
+        // renderSources();
 
         // Apply citations to any exp-summary paragraphs (they contain ~\cite references)
         document.querySelectorAll('p.exp-summary').forEach(p => {
             p.innerHTML = applyCitations(p.innerHTML);
         });
 
-        // Ensure large image view is clipped properly on first render
-        updateLargeImageView();
+        // Removed duplicate initial image render to prevent double rows
+        // updateLargeImageView();
 
         // Hook up citation copy button
         const copyBtn = document.getElementById('copy-cite-btn');
