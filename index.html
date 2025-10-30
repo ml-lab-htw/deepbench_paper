@@ -18,7 +18,7 @@
     <main>
         <section id="abstract">
             <h2>Abstract</h2>
-            <p>Robustness evaluation of computer vision and vision-language models (VLMs) remains a critical challenge, particularly when models are deployed in domain-specific settings that differ significantly from their training distributions. While existing benchmarks target generic corruptions or adversarial attacks, they offer limited insight into how models perform under realistic visual conditions, such as lighting variability in handheld photography or anatomical variation in medical imaging. Additionally, the increasing reliance on large pretrained foundation models with opaque data pipelines complicates the analysis of potential failure modes. In this work, we introduce DeepBench, a framework for evaluating domain-specific robustness without requiring labeled data. Given a high-level description of the deployment environment, a large language model (LLM) selects a context-relevant corruption set that simulates expected visual variability. The framework supports both standard accuracy-based metrics and an unsupervised measure of prediction consistency, the label-flip probability (LFP), enabling robustness analysis even in data-scarce applications. We systematically benchmark five popular VLMs—CLIP, SigLIP, ALIGN, LLaVA, and Gemma—across six real-world domains. Our results show that robustness and performance vary significantly by use case: no single model dominates across all domains. These findings underscore the importance of domain-specific evaluation, which captures failure modes that generic robustness benchmarks may overlook. Furthermore, we validate LFP as a reliable proxy for accuracy under corruption, supporting its use in label-free settings. We release our framework as open-source software on <a href="https://github.com/ml-lab-htw/deepbench">GitHub</a>.</p>
+            <p>Robustness evaluation of computer vision and vision-language models (VLMs) remains a critical challenge, particularly when models are deployed in domain-specific settings that differ significantly from their training distributions. While existing benchmarks target generic corruptions or adversarial attacks, they offer limited insight into how models perform under realistic visual conditions, such as lighting variability in handheld photography or anatomical variation in medical imaging. Additionally, the increasing reliance on large pretrained foundation models with opaque data pipelines complicates the analysis of potential failure modes. In this work, we introduce DeepBench, a framework for evaluating domain-specific robustness without requiring labeled data. Given a high-level description of the deployment environment, a large language model (LLM) selects a context-relevant corruption set that simulates expected visual variability. The framework supports both standard accuracy-based metrics and an unsupervised measure of prediction consistency, the label-flip probability (LFP), enabling robustness analysis even in data-scarce applications. We systematically benchmark five popular VLMs—CLIP, SigLIP, ALIGN, LLaVA, and Gemma—across six real-world domains. Our results show that robustness and performance vary significantly by use case: no single model dominates across all domains. These findings underscore the importance of domain-specific evaluation, which captures failure modes that generic robustness benchmarks may overlook. Furthermore, we validate LFP as a reliable proxy for accuracy under corruption, supporting its use in label-free settings. We release our framework as open-source software on <a href="https://github.com/ml-lab-htw/deepbench" target="_blank">GitHub</a>.</p>
             <div class="social-links">
                 <a href="https://github.com/ml-lab-htw/deepbench" class="social-link" aria-label="GitHub Repository" target="_blank">
                     <i class="fab fa-github"></i>
@@ -33,8 +33,8 @@
             <h2>Corruption Examples</h2>
             <h3 id="corruption-type-heading"></h3>
             <p id="corruption-description"></p>
-            <div id="thumbnail-container">
-                <!-- Thumbnails will be populated by JavaScript -->
+            <div id="thumbnail-container" class="thumbnail-container">
+                <!-- Thumbnails populated by JS -->
             </div>
             <h3>Severity Levels</h3>
             <div id="large-image-container">
@@ -44,74 +44,33 @@
 
         <section id="experiments">
             <h2>How Robust Are Foundation VLMs to Domain-Specific Corruptions?</h2>
-            <p class="exp-summary"><strong>Answer:</strong> No single VLM is universally robust. CLIP shows the strongest average corruption robustness, Gemma follows closely, and LLaVA achieves the lowest flip rate. Robustness still varies substantially across domains and corruption types, underscoring the need for domain-specific evaluation. <strong>Setup:</strong> We evaluate five pretrained VLMs (CLIP, SigLIP, ALIGN, LLaVA, Gemma) in zero-shot across six real-world domains, each with its domain-specific corruption set and multiple severity levels. We report balanced accuracy and label flip probability.</p>
-
-            <div class="tabs"><!-- no longer used; kept for layout compatibility --></div>
-
-            <!-- Use case selection (thumbnail gallery like corruptions) -->
-            <h3 id="usecase-type-heading"></h3>
-            <div id="usecase-description-box">
-                <p id="usecase-description"></p>
-            </div>
-            <div id="usecase-thumbnail-container"></div>
-
-            <div id="plot-options" class="plot-options">
-                <label><input type="checkbox" id="filter-by-corruption"> Show only selected corruption</label>
-                <span id="plot-context-label" class="plot-context-label"></span>
-            </div>
-
-            <div id="plots-container">
-                <!-- Plots will be populated by JavaScript -->
-            </div>
+            <p class="exp-summary" data-exp="main"><strong>Answer:</strong> No single VLM is universally robust. CLIP shows the strongest average corruption robustness, Gemma follows closely, and LLaVA achieves the lowest flip rate. Robustness still varies substantially across domains and corruption types, underscoring the need for domain-specific evaluation. <strong>Setup:</strong> We evaluate five pretrained VLMs (CLIP, SigLIP, ALIGN, LLaVA, Gemma) in zero-shot across six real-world domains, each with its domain-specific corruption set and multiple severity levels. We report balanced accuracy and label flip probability.</p>
+            <div class="experiment" data-exp="main"></div>
         </section>
 
-        <!-- New: Experiment 3 - Specialists -->
         <section id="experiments-specialists">
             <h2>Is Domain-Specific Fine-Tuning Beneficial for Robustness?</h2>
-            <p class="exp-summary"><strong>Answer:</strong> Fine-tuning on a specific domain can boost clean performance on that modality but may reduce robustness to corruptions. <strong>Setup:</strong> We compare general-purpose VLMs to domain-specialized variants in two domains—Medical and Satellite—using their respective corruption sets, reporting clean accuracy and flip-based robustness.</p>
-
-            <h3 id="specialists-type-heading"></h3>
-            <div id="specialists-thumbnail-container"></div>
-
-            <div id="specialists-plots">
-                <h3>Balanced Accuracy</h3>
-                <img id="specialists-acc-plot" alt="Specialists balanced accuracy plot">
-                <h3>Label Flip Probability</h3>
-                <img id="specialists-flip-plot" alt="Specialists label flip plot">
-            </div>
+            <p class="exp-summary" data-exp="specialists"><strong>Answer:</strong> Fine-tuning on a specific domain can boost clean performance on that modality but may reduce robustness to corruptions. <strong>Setup:</strong> We compare general-purpose VLMs to domain-specialized variants in two domains—Medical and Satellite—using their respective corruption sets, reporting clean accuracy and flip-based robustness.</p>
+            <div class="experiment" data-exp="specialists"></div>
         </section>
 
-        <!-- New: Experiment 4 - Architecture -->
         <section id="experiments-architecture">
             <h2>How Does Model Architecture Affect Robustness?</h2>
-            <p class="exp-summary"><strong>Answer:</strong> Transformer-based models with higher capacity tend to show stronger robustness to domain-specific corruptions; smaller patch sizes have mixed effects. <strong>Setup:</strong> We compare CLIP variants across architecture (ResNet vs. ViT), patch size, input resolution, and activation, all trained on the same OpenAI dataset. Models are evaluated across the six domains with their domain-specific corruption sets; we report balanced accuracy and label flip probability per domain and corruption. <strong>Results:</strong> ViTs generally outperform ResNets; higher input resolution (ViT‑L/14@336) reduces corruption error across domains; Quick‑GELU improves robustness over the ViT‑L/14 baseline in most domains.</p>
-
-            <h3 id="arch-usecase-type-heading"></h3>
-            <div id="arch-usecase-thumbnail-container"></div>
-
-            <div id="arch-plot-options" class="plot-options">
-                <label><input type="checkbox" id="arch-filter-by-corruption"> Show only selected corruption</label>
-                <span id="arch-plot-context-label" class="plot-context-label"></span>
-            </div>
-
-            <div id="arch-plots-container"></div>
+            <p class="exp-summary" data-exp="architecture"><strong>Answer:</strong> Transformer-based models with higher capacity tend to show stronger robustness to domain-specific corruptions; smaller patch sizes have mixed effects. <strong>Setup:</strong> We compare CLIP variants across architecture (ResNet vs. ViT), patch size, input resolution, and activation, all trained on the same OpenAI dataset. Models are evaluated across the six domains with their domain-specific corruption sets; we report balanced accuracy and label flip probability per domain and corruption.</p>
+            <div class="experiment" data-exp="architecture"></div>
         </section>
 
-        <!-- New: Experiment 5 - Pretraining Data -->
         <section id="experiments-pretraining">
             <h2>How Does Pretraining Data Influence Robustness?</h2>
-            <p class="exp-summary"><strong>Answer:</strong> Curated, semantically aligned pretraining data yields higher accuracy and robustness than noisy corpora. OpenAI baseline excels in People due to domain alignment. <strong>Setup:</strong> Evaluate CLIP ViT-L/14 on five datasets: LAION-400M (Schuhmann et al., 2021), MetaCLIP FullCC (Xu et al., 2024), CommonPool, DataComp XL (Gadre et al., 2023), DFN2B (Fang et al., 2023), and OpenAI (Radford et al., 2021). Tested on six domains with domain-specific corruptions. <strong>Results:</strong> Curated models outperform noisy ones in accuracy and mean corruption error (mce). CommonPool tops in Driving and Manufacturing; LAION-400M lags in Medical. OpenAI leads in People, showing domain alignment matters.</p>
-
-            <h3 id="pretraining-usecase-type-heading"></h3>
-            <div id="pretraining-usecase-thumbnail-container"></div>
-
-            <div id="pretraining-plot-options" class="plot-options">
-                <label><input type="checkbox" id="pretraining-filter-by-corruption"> Show only selected corruption</label>
-                <span id="pretraining-plot-context-label" class="plot-context-label"></span>
-            </div>
-
-            <div id="pretraining-plots-container"></div>
+            <p class="exp-summary" data-exp="pretraining"><strong>Answer:</strong> Curated, semantically aligned pretraining data yields higher accuracy and robustness than noisy corpora. <strong>Setup:</strong> Evaluate CLIP ViT-L/14 on five datasets: LAION-400M (Schuhmann et al., 2021), MetaCLIP FullCC (Xu et al., 2024), CommonPool, DataComp XL (Gadre et al., 2023), DFN2B (Fang et al., 2023), and OpenAI (Radford et al., 2021). Tested on six domains with domain-specific corruptions. <strong>Results:</strong> Curated models outperform noisy ones in accuracy and mean corruption error (mce).</p>
+            <div class="experiment" data-exp="pretraining"></div>
         </section>
+
+        <section id="sources">
+          <h2>Sources</h2>
+          <div id="sources-list"></div>
+        </section>
+
 
         <section id="citation">
             <h2>How to Cite</h2>

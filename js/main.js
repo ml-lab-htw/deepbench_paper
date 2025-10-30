@@ -1,83 +1,23 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- STATE ---
     let currentCorruption = 'Brightness';
-    let currentUseCase = 'AutonomousDriving';
-
-    // --- STATE (Specialists) ---
-    let currentSpecialistsDomain = 'MedicalDiagnosis';
-
-    // --- STATE (Architecture) ---
-    let currentArchUseCase = 'AutonomousDriving';
-
-    // --- STATE (Pretraining) ---
-    let currentPretrainingUseCase = 'AutonomousDriving';
 
     // --- DOM ELEMENTS ---
     const largeImage = document.getElementById('large-image');
     const corruptionTypeHeading = document.getElementById('corruption-type-heading');
     const corruptionDescription = document.getElementById('corruption-description');
     const topThumbnailContainer = document.getElementById('thumbnail-container');
-    const tabsContainer = document.querySelector('.tabs');
-    const plotsContainer = document.getElementById('plots-container');
-    const datasetSourceContent = document.getElementById('dataset-source-content');
-    const useCaseTypeHeading = document.getElementById('usecase-type-heading');
-    const useCaseDescription = document.getElementById('usecase-description');
-    const useCaseThumbnailContainer = document.getElementById('usecase-thumbnail-container');
-    const useCaseDescriptionBox = document.getElementById('usecase-description-box');
-    const filterToggle = document.getElementById('filter-by-corruption');
-    const plotContextLabel = document.getElementById('plot-context-label');
-
-    // --- DOM (Architecture) ---
-    const archUseCaseHeading = document.getElementById('arch-usecase-type-heading');
-    const archUseCaseThumbs = document.getElementById('arch-usecase-thumbnail-container');
-    const archPlotsContainer = document.getElementById('arch-plots-container');
-    const archFilterToggle = document.getElementById('arch-filter-by-corruption');
-    const archPlotContextLabel = document.getElementById('arch-plot-context-label');
-
-    // --- DOM (Pretraining) ---
-    const pretrainingUseCaseHeading = document.getElementById('pretraining-usecase-type-heading');
-    const pretrainingUseCaseThumbs = document.getElementById('pretraining-usecase-thumbnail-container');
-    const pretrainingPlotsContainer = document.getElementById('pretraining-plots-container');
-    const pretrainingFilterToggle = document.getElementById('pretraining-filter-by-corruption');
-    const pretrainingPlotContextLabel = document.getElementById('pretraining-plot-context-label');
-
-    // --- DOM (Specialists) ---
-    const specialistsHeading = document.getElementById('specialists-type-heading');
-    const specialistsThumbs = document.getElementById('specialists-thumbnail-container');
-    const specialistsAccImg = document.getElementById('specialists-acc-plot');
-    const specialistsFlipImg = document.getElementById('specialists-flip-plot');
 
     // --- DATA ---
     const corruptions = [
-        'Brightness', 'CloudGenerator', 'Contrast', 'GaussianBlur', 'GaussianNoise',
+        'Brightness', 'Contrast', 'GaussianBlur', 'GaussianNoise',
         'GlobalColourShift', 'GridDistortion', 'GridElasticDeformation',
         'ImageRotation', 'MotionBlur', 'PerspectiveTransformation', 'Rain',
-        'SaltPepperNoise', 'Shadow'
+        'SaltPepperNoise', 'Shadow', 'CloudGenerator'
     ];
 
-    const citationData = {
-        'wang2017chestx': 'https://www.cv-foundation.org/openaccess/content_cvpr_2017/html/Wang_ChestX-ray8_Hospital-Scale_Chest_CVPR_2017_paper.html',
-        'halabi2019rsna': 'https://pubs.rsna.org/doi/10.1148/radiol.2018180548',
-        'sarhan2024knee': 'https://www.atlantis-press.com/journals/ijcis/125970008/view',
-        'ali2016detection': 'https://www.thinkmind.org/index.php?view=article&articleid=icsea_2016_10_30_30103',
-        'baby2017automatic': 'https://ieeexplore.ieee.org/document/7953361',
-        'al2020dataset': 'https://www.sciencedirect.com/science/article/pii/S235234091931228X',
-        'joo2023classification': 'https://www.mdpi.com/2075-4418/13/8/1380',
-        'lee2017curated': 'https://www.nature.com/articles/sdata2017177',
-        'geiger2012we': 'http://www.cvlibs.net/publications/Geiger2012CVPR.pdf',
-        'bergmann2019mvtec': 'https://www.mvtec.com/company/research/datasets/mvtec-ad',
-        'goodfellow2013challenges': 'https://link.springer.com/chapter/10.1007/978-3-642-41340-3_8',
-        'xia2017aid': 'https://ieeexplore.ieee.org/document/7926695',
-        'bossard2014food': 'https://link.springer.com/chapter/10.1007/978-3-319-10578-9_29',
-        'schuhmann2021laion': 'https://arxiv.org/abs/2111.02114',
-        'xu2024demystifying': 'https://arxiv.org/abs/2406.07577',
-        'gadre2023datacomp': 'https://arxiv.org/abs/2304.14108',
-        'fang2023data': 'https://arxiv.org/abs/2309.14319',
-        'radford2021learning': 'https://arxiv.org/abs/2103.00020'
-    };
-
     const datasetSources = {
-        'MedicalDiagnosis': '<strong>Medical:</strong> We use eight datasets for medical domain identification, including chest X-rays~\\citep{wang2017chestx}, hand X-rays for bone age assessment~\\citep{halabi2019rsna}, knee X-rays for osteoarthritis diagnosis~\\citep{sarhan2024knee}, dental X-rays~\\citep{ali2016detection}, ultrasound images for nerve segmentation~\\citep{baby2017automatic}, breast ultrasound images~\\citep{al2020dataset}, liver fibrosis ultrasound images~\\citep{joo2023classification}, and mammography images~\\citep{lee2017curated}. Each image is labeled according to its medical domain, with 126--999 samples per class.',
+        'MedicalDiagnosis': '<strong>Medical:</strong> We use eight datasets for medical domain identification, including chest X-rays~\\citep{wang2017chestx}, hand X-rays for bone age assessment~\\citep{halabi2019rsna}, knee X-rays for osteoarthritis diagnosis~\\citep{sarhan2024knee}, dental X-rays~\\citep{ali2016detection}, ultrasound images for nerve segmentation~\\citep{baby2017automatic}, breast ultrasound images~\\citep{al2020dataset}, liver fibrosis ultrasound images~\\citep{joo2013classification}, and mammography images~\\citep{lee2017curated}. Each image is labeled according to its medical domain, with 126--999 samples per class.',
         'AutonomousDriving': '<strong>Driving:</strong> The autonomous driving dataset KITTI (Karlsruhe Institute of Technology and Toyota Technological Institute,~\\cite{geiger2012we}) consists of hours of traffic scenarios recorded with a variety of sensor modalities, including high-resolution RGB images. These images were cropped around non-overlapping object bounding boxes and re-labeled into four categories: <em>car</em>, <em>person</em>, <em>tram</em>, <em>truck</em>, with 156--4660 samples per class.',
         'ManufacturingQuality': '<strong>Manufacturing:</strong> The MVTec anomaly detection dataset for quality control (MVTec AD,~\\cite{bergmann2019mvtec}) is repurposed as a 15-class object classification task over industrial items, with 60--391 samples per class.',
         'PeopleRecognition': '<strong>People:</strong> The Facial Expression Recognition 2013 dataset (FER13,~\\cite{goodfellow2013challenges}) contains 35,887 grayscale face images labeled with seven emotion categories, with 751--1093 samples per class.',
@@ -90,8 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
         'MedicalDiagnosis', 'PeopleRecognition', 'SatelliteImaging'
     ];
 
-    const specialistsDomains = ['MedicalDiagnosis', 'SatelliteImaging'];
-
     const thumbnailFileMap = {
         'Brightness': 'Brightness_-60.png', 'CloudGenerator': 'CloudGenerator_0.5.png', 'Contrast': 'Contrast_1.5.png',
         'GaussianBlur': 'GaussianBlur_3.png', 'GaussianNoise': 'GaussianNoise_0.1.png', 'GlobalColourShift': 'GlobalColourShift_30.png',
@@ -101,16 +39,22 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const corruptionDescriptions = {
-        'GaussianBlur': 'Smoothens the image by blurring it, reducing fine details or noise.', 'ImageRotation': 'Rotates the image by a specified angle, keeping its contents intact.',
-        'GaussianNoise': 'Adds random, fine-grained noise (Gaussian) to simulate sensor noise.', 'SaltPepperNoise': 'Adds random white and black dots to the image, mimicking noisy pixels.',
-        'GlobalColourShift': 'Adjusts the overall color balance of the image, shifting its tones globally.', 'Contrast': 'Alters the difference between light and dark areas to make the image appear more or less vivid.',
-        'Brightness': 'Changes the overall lightness or darkness of the image.', 'Rain': 'Adds synthetic raindrop effects or streaks to mimic rainy conditions.',
-        'Shadow': 'Adds synthetic shadows to an image to simulate lighting conditions.', 'MotionBlur': 'Blurs the image to simulate movement, as if the camera or object was in motion.',
-        'GridDistortion': 'Distorts the image by applying a grid-like warping effect, bending specific areas.', 'GridElasticDeformation': 'Applies a rubber-sheet-like deformation to the image, bending it smoothly.',
-        'PerspectiveTransformation': 'Warps images by changing its perspective, as if viewed from a different angle.', 'CloudGenerator': 'Overlays or generates cloud-like textures in the image, simulating an overcast sky.'
+        'GaussianBlur': 'Smoothens the image by blurring it, reducing fine details or noise.',
+        'ImageRotation': 'Rotates the image by a specified angle, keeping its contents intact.',
+        'GaussianNoise': 'Adds random, fine-grained noise (Gaussian) to simulate sensor noise.',
+        'SaltPepperNoise': 'Adds random white and black dots to the image, mimicking noisy pixels.',
+        'GlobalColourShift': 'Adjusts the overall color balance of the image, shifting its tones globally.',
+        'Contrast': 'Alters the difference between light and dark areas to make the image appear more or less vivid.',
+        'Brightness': 'Changes the overall lightness or darkness of the image.',
+        'Rain': 'Adds synthetic raindrop effects or streaks to mimic rainy conditions.',
+        'Shadow': 'Adds synthetic shadows to an image to simulate lighting conditions.',
+        'MotionBlur': 'Blurs the image to simulate movement, as if the camera or object was in motion.',
+        'GridDistortion': 'Distorts the image by applying a grid-like warping effect, bending specific areas.',
+        'GridElasticDeformation': 'Applies a rubber-sheet-like deformation to the image, bending it smoothly.',
+        'PerspectiveTransformation': 'Warps images by changing its perspective, as if viewed from a different angle.',
+        'CloudGenerator': 'Overlays or generates cloud-like textures in the image, simulating an overcast sky.'
     };
 
-    // Map logical corruption names to filenames used in plots (if they differ)
     const plotCorruptionNameMap = {
         'ImageFlip': 'Flip'
     };
@@ -120,634 +64,40 @@ document.addEventListener('DOMContentLoaded', () => {
         return name.replace(/([A-Z])/g, ' $1').trim();
     }
 
+    // Replace LaTeX-like citation markers with plain bracketed citation text (no links).
+    // We use the citation key to produce something like " [Wang, 2017]" or fallback to [key].
     function applyCitations(content) {
         if (!content) return '';
-        return content.replace(/~\\(cite|citep)\{([^}]+)}/g, (match, command, key) => {
-            const url = citationData[key];
-            if (url) {
-                const year = (key.match(/\d{4}/) || [''])[0];
-                const author = key.replace(/\d{4}.*/, '');
-                const linkText = `[${author.charAt(0).toUpperCase() + author.slice(1)}, ${year}]`;
-                return ` <a href="${url}" target="_blank" class="citation-link">${linkText}</a>`;
-            }
-            return ` [${key}]`;
+        // Handle ~\citep and ~\cite (with leading tilde)
+        content = content.replace(/~\\(?:cite|citep)\{([^}]+)}/g, (m, key) => {
+            const yearMatch = key.match(/\d{4}/);
+            const year = yearMatch ? yearMatch[0] : '';
+            const authorPart = key.replace(/\d{4}.*/, '');
+            const author = authorPart ? (authorPart.charAt(0).toUpperCase() + authorPart.slice(1)) : key;
+            return ` [${author}${year ? ', ' + year : ''}]`;
         });
-    }
-
-    // Check if an image URL exists by attempting to load it
-    function imageExists(url) {
-        return new Promise(resolve => {
-            const img = new Image();
-            img.onload = () => resolve(true);
-            img.onerror = () => resolve(false);
-            img.src = url;
+        // Handle \cite and \citep without tilde
+        content = content.replace(/\\(?:cite|citep)\{([^}]+)}/g, (m, key) => {
+            const yearMatch = key.match(/\d{4}/);
+            const year = yearMatch ? yearMatch[0] : '';
+            const authorPart = key.replace(/\d{4}.*/, '');
+            const author = authorPart ? (authorPart.charAt(0).toUpperCase() + authorPart.slice(1)) : key;
+            return ` [${author}${year ? ', ' + year : ''}]`;
         });
-    }
-
-    // Ensure the filter toggle state reflects availability; then update plots
-    function ensureFilterToggleState() {
-        const uc = currentUseCase;
-        const corr = currentCorruption;
-        const corrForFile = plotCorruptionNameMap[corr] || corr;
-
-        const perCorrAcc = `assets/experiments/main/acc_${uc}_${corrForFile}.png`;
-        const perCorrFlip = `assets/experiments/main/flip_${uc}_${corrForFile}.png`;
-
-        return Promise.all([imageExists(perCorrAcc), imageExists(perCorrFlip)]).then(([accOk, flipOk]) => {
-            const available = accOk && flipOk;
-            // Do NOT change checkbox state; keep it as user set it.
-            // Optionally hint unavailability via title/label, but keep it enabled and checked state intact.
-            if (filterToggle) {
-                filterToggle.disabled = false; // always allow user to keep preference
-                filterToggle.title = available ? '' : 'Per-corruption plots not available for this selection (showing combined instead)';
-                if (!available && filterToggle.checked && plotContextLabel) {
-                    plotContextLabel.textContent = `Per-corruption plot not available for ${humanizeCamelCase(corr)} in ${humanizeCamelCase(uc)} — showing combined.`;
-                }
-            }
-            updatePlotsView();
-        });
-    }
-
-    // Ensure the ARCH filter toggle state reflects availability; then update arch plots
-    function ensureArchFilterToggleState() {
-        if (!archPlotsContainer) return Promise.resolve();
-        const uc = currentArchUseCase;
-        const corr = currentCorruption;
-        const corrForFile = plotCorruptionNameMap[corr] || corr;
-
-        const perCorrAcc = `assets/experiments/architecture/acc_${uc}_${corrForFile}.png`;
-        const perCorrFlip = `assets/experiments/architecture/flip_${uc}_${corrForFile}.png`;
-
-        return Promise.all([imageExists(perCorrAcc), imageExists(perCorrFlip)]).then(([accOk, flipOk]) => {
-            const available = accOk && flipOk;
-            if (archFilterToggle) {
-                archFilterToggle.disabled = false;
-                archFilterToggle.title = available ? '' : 'Per-corruption plots not available for this selection (showing combined instead)';
-                if (!available && archFilterToggle.checked && archPlotContextLabel) {
-                    archPlotContextLabel.textContent = `Per-corruption plot not available for ${humanizeCamelCase(corr)} in ${humanizeCamelCase(uc)} — showing combined.`;
-                }
-            }
-            updateArchitecturePlotsView();
-        });
-    }
-
-    // Ensure the PRETRAINING filter toggle state reflects availability; then update pretraining plots
-    function ensurePretrainingFilterToggleState() {
-        if (!pretrainingPlotsContainer) return Promise.resolve();
-        const uc = currentPretrainingUseCase;
-        const corr = currentCorruption;
-        const corrForFile = plotCorruptionNameMap[corr] || corr;
-
-        const perCorrAcc = `assets/experiments/pretraining/acc_${uc}_${corrForFile}.png`;
-        const perCorrFlip = `assets/experiments/pretraining/flip_${uc}_${corrForFile}.png`;
-
-        return Promise.all([imageExists(perCorrAcc), imageExists(perCorrFlip)]).then(([accOk, flipOk]) => {
-            const available = accOk && flipOk;
-            if (pretrainingFilterToggle) {
-                pretrainingFilterToggle.disabled = false;
-                pretrainingFilterToggle.title = available ? '' : 'Per-corruption plots not available for this selection (showing combined instead)';
-                if (!available && pretrainingFilterToggle.checked && pretrainingPlotContextLabel) {
-                    pretrainingPlotContextLabel.textContent = `Per-corruption plot not available for ${humanizeCamelCase(corr)} in ${humanizeCamelCase(uc)} — showing combined.`;
-                }
-            }
-            updatePretrainingPlotsView();
-        });
+        return content;
     }
 
     // --- UPDATE FUNCTIONS ---
-    function updateAllViews() {
-        updateLargeImageView();
-        updateDatasetSourceView();
-        updateUseCaseSelectionView();
-        lockUseCaseDescriptionHeight();
-        // Defer plot updates until we know availability to avoid flicker
-        ensureFilterToggleState();
-        // Also update architecture section (uses same selected corruption)
-        ensureArchFilterToggleState();
-        // And pretraining section
-        ensurePretrainingFilterToggleState();
-    }
-
     function updateLargeImageView() {
-        // Update heading and description
         const corruptionName = humanizeCamelCase(currentCorruption);
         corruptionTypeHeading.innerHTML = `Selected: <strong>${corruptionName}</strong>`;
         corruptionDescription.textContent = corruptionDescriptions[currentCorruption] || '';
-
-        // Update large image
+        // Large image path: assets/images/<Corruption>.png (or folder fallback)
         largeImage.src = `assets/images/${currentCorruption}.png`;
-
-        // Update active thumbnail
+        // Activate thumbnail
         document.querySelectorAll('#thumbnail-container .thumbnail').forEach(thumb => {
             thumb.classList.toggle('active', thumb.dataset.corruption === currentCorruption);
         });
-    }
-
-    function updateUseCaseSelectionView() {
-        const useCaseName = humanizeCamelCase(currentUseCase);
-        useCaseTypeHeading.innerHTML = `Selected: <strong>${useCaseName}</strong>`;
-
-        let content = datasetSources[currentUseCase] || '';
-        content = applyCitations(content);
-        useCaseDescription.innerHTML = content || 'Description not available.';
-
-        // Update active use case thumbnail
-        document.querySelectorAll('#usecase-thumbnail-container .thumbnail').forEach(thumb => {
-            thumb.classList.toggle('active', thumb.dataset.usecase === currentUseCase);
-        });
-    }
-
-    function updateDatasetSourceView() {
-        let content = datasetSources[currentUseCase] || '';
-        content = applyCitations(content);
-        if (datasetSourceContent) {
-            datasetSourceContent.innerHTML = content;
-        }
-    }
-
-    function updatePlotsView() {
-        const accImg = document.getElementById('acc-plot');
-        const flipImg = document.getElementById('flip-plot');
-        const uc = currentUseCase;
-        const corr = currentCorruption;
-        const corrForFile = plotCorruptionNameMap[corr] || corr;
-
-        const combinedAcc = `assets/experiments/main/acc_${uc}.png`;
-        const combinedFlip = `assets/experiments/main/flip_${uc}.png`;
-        const perCorrAcc = `assets/experiments/main/acc_${uc}_${corrForFile}.png`;
-        const perCorrFlip = `assets/experiments/main/flip_${uc}_${corrForFile}.png`;
-
-        const showPerCorruption = !!(filterToggle && filterToggle.checked);
-        let anyFallbackUsed = false;
-
-        // Toggle side-by-side layout when showing per-corruption
-        if (plotsContainer) {
-            plotsContainer.classList.toggle('side-by-side', showPerCorruption);
-        }
-
-        // Helper: apply src with one-time fallback, set flag and label on fallback
-        function setWithFallback(img, primary, fallback, altPrimary, altFallback) {
-            img.onerror = null; // reset any previous handler
-            img.src = primary;
-            img.alt = altPrimary;
-            img.onerror = () => {
-                img.onerror = null; // avoid loops
-                img.src = fallback;
-                img.alt = altFallback;
-                anyFallbackUsed = true;
-                updatePlotContextLabel(showPerCorruption, uc, corr, anyFallbackUsed);
-            };
-        }
-
-        if (showPerCorruption) {
-            setWithFallback(
-                accImg,
-                perCorrAcc,
-                combinedAcc,
-                `Balanced accuracy for ${humanizeCamelCase(uc)} — ${humanizeCamelCase(corr)}`,
-                `Balanced accuracy for ${humanizeCamelCase(uc)} (combined)`
-            );
-            setWithFallback(
-                flipImg,
-                perCorrFlip,
-                combinedFlip,
-                `Label flip probability for ${humanizeCamelCase(uc)} — ${humanizeCamelCase(corr)}`,
-                `Label flip probability for ${humanizeCamelCase(uc)} (combined)`
-            );
-        } else {
-            // Combined only
-            accImg.onerror = null;
-            flipImg.onerror = null;
-            accImg.src = combinedAcc;
-            accImg.alt = `Balanced accuracy for ${humanizeCamelCase(uc)} (combined)`;
-            flipImg.src = combinedFlip;
-            flipImg.alt = `Label flip probability for ${humanizeCamelCase(uc)} (combined)`;
-        }
-
-        updatePlotContextLabel(showPerCorruption, uc, corr, anyFallbackUsed);
-    }
-
-    function updatePlotContextLabel(showPerCorruption, uc, corr, usedFallback = false) {
-        if (!plotContextLabel) return;
-        if (showPerCorruption) {
-            if (usedFallback) {
-                plotContextLabel.textContent = `Per-corruption plot not available for ${humanizeCamelCase(corr)} in ${humanizeCamelCase(uc)} — showing combined.`;
-            } else {
-                plotContextLabel.textContent = `Showing: ${humanizeCamelCase(uc)} — ${humanizeCamelCase(corr)}`;
-            }
-        } else {
-            plotContextLabel.textContent = '';
-        }
-    }
-
-    // Architecture section updaters
-    function updateArchitectureUseCaseHeading() {
-        if (!archUseCaseHeading) return;
-        const useCaseName = humanizeCamelCase(currentArchUseCase);
-        archUseCaseHeading.innerHTML = `Selected: <strong>${useCaseName}</strong>`;
-    }
-
-    function updateArchitectureActiveThumb() {
-        if (!archUseCaseThumbs) return;
-        archUseCaseThumbs.querySelectorAll('.thumbnail').forEach(img => {
-            img.classList.toggle('active', img.dataset.usecase === currentArchUseCase);
-        });
-    }
-
-    function updateArchitecturePlotsView() {
-        if (!archPlotsContainer) return;
-        const accImg = document.getElementById('arch-acc-plot');
-        const flipImg = document.getElementById('arch-flip-plot');
-        const uc = currentArchUseCase;
-        const corr = currentCorruption;
-        const corrForFile = plotCorruptionNameMap[corr] || corr;
-
-        const combinedAcc = `assets/experiments/architecture/acc_${uc}.png`;
-        const combinedFlip = `assets/experiments/architecture/flip_${uc}.png`;
-        const perCorrAcc = `assets/experiments/architecture/acc_${uc}_${corrForFile}.png`;
-        const perCorrFlip = `assets/experiments/architecture/flip_${uc}_${corrForFile}.png`;
-
-        const showPerCorruption = !!(archFilterToggle && archFilterToggle.checked);
-        let anyFallbackUsed = false;
-
-        // Toggle side-by-side layout when showing per-corruption
-        archPlotsContainer.classList.toggle('side-by-side', showPerCorruption);
-
-        function setWithFallback(img, primary, fallback, altPrimary, altFallback) {
-            img.onerror = null;
-            img.src = primary;
-            img.alt = altPrimary;
-            img.onerror = () => {
-                img.onerror = null;
-                img.src = fallback;
-                img.alt = altFallback;
-                anyFallbackUsed = true;
-                updateArchitecturePlotContextLabel(showPerCorruption, uc, corr, anyFallbackUsed);
-            };
-        }
-
-        if (showPerCorruption) {
-            setWithFallback(
-                accImg,
-                perCorrAcc,
-                combinedAcc,
-                `Balanced accuracy (architecture) for ${humanizeCamelCase(uc)} — ${humanizeCamelCase(corr)}`,
-                `Balanced accuracy (architecture) for ${humanizeCamelCase(uc)} (combined)`
-            );
-            setWithFallback(
-                flipImg,
-                perCorrFlip,
-                combinedFlip,
-                `Label flip probability (architecture) for ${humanizeCamelCase(uc)} — ${humanizeCamelCase(corr)}`,
-                `Label flip probability (architecture) for ${humanizeCamelCase(uc)} (combined)`
-            );
-        } else {
-            accImg.onerror = null;
-            flipImg.onerror = null;
-            accImg.src = combinedAcc;
-            accImg.alt = `Balanced accuracy (architecture) for ${humanizeCamelCase(uc)} (combined)`;
-            flipImg.src = combinedFlip;
-            flipImg.alt = `Label flip probability (architecture) for ${humanizeCamelCase(uc)} (combined)`;
-        }
-
-        updateArchitecturePlotContextLabel(showPerCorruption, uc, corr, anyFallbackUsed);
-    }
-
-    function updateArchitecturePlotContextLabel(showPerCorruption, uc, corr, usedFallback = false) {
-        if (!archPlotContextLabel) return;
-        if (showPerCorruption) {
-            if (usedFallback) {
-                archPlotContextLabel.textContent = `Per-corruption plot not available for ${humanizeCamelCase(corr)} in ${humanizeCamelCase(uc)} — showing combined.`;
-            } else {
-                archPlotContextLabel.textContent = `Showing: ${humanizeCamelCase(uc)} — ${humanizeCamelCase(corr)}`;
-            }
-        } else {
-            archPlotContextLabel.textContent = '';
-        }
-    }
-
-    // Pretraining section updaters
-    function updatePretrainingUseCaseHeading() {
-        if (!pretrainingUseCaseHeading) return;
-        const useCaseName = humanizeCamelCase(currentPretrainingUseCase);
-        pretrainingUseCaseHeading.innerHTML = `Selected: <strong>${useCaseName}</strong>`;
-    }
-
-    function updatePretrainingActiveThumb() {
-        if (!pretrainingUseCaseThumbs) return;
-        pretrainingUseCaseThumbs.querySelectorAll('.thumbnail').forEach(img => {
-            img.classList.toggle('active', img.dataset.usecase === currentPretrainingUseCase);
-        });
-    }
-
-    function updatePretrainingPlotsView() {
-        if (!pretrainingPlotsContainer) return;
-        const accImg = document.getElementById('pretraining-acc-plot');
-        const flipImg = document.getElementById('pretraining-flip-plot');
-        const uc = currentPretrainingUseCase;
-        const corr = currentCorruption;
-        const corrForFile = plotCorruptionNameMap[corr] || corr;
-
-        const combinedAcc = `assets/experiments/pretraining/acc_${uc}.png`;
-        const combinedFlip = `assets/experiments/pretraining/flip_${uc}.png`;
-        const perCorrAcc = `assets/experiments/pretraining/acc_${uc}_${corrForFile}.png`;
-        const perCorrFlip = `assets/experiments/pretraining/flip_${uc}_${corrForFile}.png`;
-
-        const showPerCorruption = !!(pretrainingFilterToggle && pretrainingFilterToggle.checked);
-        let anyFallbackUsed = false;
-
-        // Toggle side-by-side layout when showing per-corruption
-        pretrainingPlotsContainer.classList.toggle('side-by-side', showPerCorruption);
-
-        function setWithFallback(img, primary, fallback, altPrimary, altFallback) {
-            img.onerror = null;
-            img.src = primary;
-            img.alt = altPrimary;
-            img.onerror = () => {
-                img.onerror = null;
-                img.src = fallback;
-                img.alt = altFallback;
-                anyFallbackUsed = true;
-                updatePretrainingPlotContextLabel(showPerCorruption, uc, corr, anyFallbackUsed);
-            };
-        }
-
-        if (showPerCorruption) {
-            setWithFallback(
-                accImg,
-                perCorrAcc,
-                combinedAcc,
-                `Balanced accuracy (pretraining) for ${humanizeCamelCase(uc)} — ${humanizeCamelCase(corr)}`,
-                `Balanced accuracy (pretraining) for ${humanizeCamelCase(uc)} (combined)`
-            );
-            setWithFallback(
-                flipImg,
-                perCorrFlip,
-                combinedFlip,
-                `Label flip probability (pretraining) for ${humanizeCamelCase(uc)} — ${humanizeCamelCase(corr)}`,
-                `Label flip probability (pretraining) for ${humanizeCamelCase(uc)} (combined)`
-            );
-        } else {
-            accImg.onerror = null;
-            flipImg.onerror = null;
-            accImg.src = combinedAcc;
-            accImg.alt = `Balanced accuracy (pretraining) for ${humanizeCamelCase(uc)} (combined)`;
-            flipImg.src = combinedFlip;
-            flipImg.alt = `Label flip probability (pretraining) for ${humanizeCamelCase(uc)} (combined)`;
-        }
-
-        updatePretrainingPlotContextLabel(showPerCorruption, uc, corr, anyFallbackUsed);
-    }
-
-    function updatePretrainingPlotContextLabel(showPerCorruption, uc, corr, usedFallback = false) {
-        if (!pretrainingPlotContextLabel) return;
-        if (showPerCorruption) {
-            if (usedFallback) {
-                pretrainingPlotContextLabel.textContent = `Per-corruption plot not available for ${humanizeCamelCase(corr)} in ${humanizeCamelCase(uc)} — showing combined.`;
-            } else {
-                pretrainingPlotContextLabel.textContent = `Showing: ${humanizeCamelCase(uc)} — ${humanizeCamelCase(corr)}`;
-            }
-        } else {
-            pretrainingPlotContextLabel.textContent = '';
-        }
-    }
-
-    // Measure tallest description across use cases and fix the box height
-    function lockUseCaseDescriptionHeight() {
-        if (!useCaseDescriptionBox) return;
-
-        // Create a hidden measurer with the same width
-        const measurer = document.createElement('div');
-        measurer.style.visibility = 'hidden';
-        measurer.style.position = 'absolute';
-        measurer.style.left = '-9999px';
-        measurer.style.top = '0';
-        // Match width to current box width to reflect wrapping at this breakpoint
-        const targetWidth = useCaseDescriptionBox.clientWidth || useCaseDescriptionBox.offsetWidth || 600;
-        measurer.style.width = targetWidth + 'px';
-        // Inherit font styles from body/section
-        measurer.style.fontFamily = getComputedStyle(useCaseDescriptionBox).fontFamily;
-        measurer.style.fontSize = getComputedStyle(useCaseDescriptionBox).fontSize;
-        measurer.style.lineHeight = getComputedStyle(useCaseDescriptionBox).lineHeight;
-        document.body.appendChild(measurer);
-
-        let maxH = 0;
-        useCases.forEach(uc => {
-            const raw = datasetSources[uc] || '';
-            const html = applyCitations(raw);
-            measurer.innerHTML = `<p style="margin:0">${html}</p>`;
-            const h = measurer.offsetHeight;
-            if (h > maxH) maxH = h;
-        });
-
-        document.body.removeChild(measurer);
-        if (maxH > 0) {
-            useCaseDescriptionBox.style.height = maxH + 'px';
-        }
-    }
-
-    // Debounced resize handler to recompute height when layout width changes
-    let resizeTimer = null;
-    window.addEventListener('resize', () => {
-        if (resizeTimer) clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-            // reset height to allow recalculation under new width
-            useCaseDescriptionBox.style.height = 'auto';
-            lockUseCaseDescriptionHeight();
-        }, 150);
-    });
-
-    // --- INITIALIZATION ---
-    function initialize() {
-        // 1. Create Corruption Thumbnails (Top Gallery)
-        corruptions.forEach(corruptionName => {
-            const thumbnail = createThumbnail(corruptionName, () => {
-                currentCorruption = corruptionName;
-                updateAllViews();
-            });
-            topThumbnailContainer.appendChild(thumbnail);
-        });
-
-        // 2. Create Use Case Thumbnails (Experiments)
-        if (tabsContainer) tabsContainer.innerHTML = '';
-        useCaseThumbnailContainer.innerHTML = '';
-        useCases.forEach(useCase => {
-            const thumb = createUseCaseThumbnail(useCase, () => {
-                currentUseCase = useCase;
-                updateAllViews();
-            });
-            useCaseThumbnailContainer.appendChild(thumb);
-        });
-
-        // Restore persisted toggle
-        if (filterToggle) {
-            const saved = localStorage.getItem('filterByCorruption');
-            if (saved === '1' || saved === '0') {
-                filterToggle.checked = saved === '1';
-            }
-        }
-
-        // 3. Create Plot Elements
-        plotsContainer.innerHTML = '';
-
-        // Accuracy block
-        const accBlock = document.createElement('div');
-        accBlock.className = 'plot-block';
-        const accTitle = document.createElement('h3');
-        accTitle.textContent = 'Balanced Accuracy';
-        const accImg = document.createElement('img');
-        accImg.id = 'acc-plot';
-        accImg.onerror = () => { accImg.alt = 'Plot not available.'; };
-        accBlock.appendChild(accTitle);
-        accBlock.appendChild(accImg);
-        plotsContainer.appendChild(accBlock);
-
-        // Flip block
-        const flipBlock = document.createElement('div');
-        flipBlock.className = 'plot-block';
-        const flipTitle = document.createElement('h3');
-        flipTitle.textContent = 'Label Flip Probability';
-        const flipImg = document.createElement('img');
-        flipImg.id = 'flip-plot';
-        flipImg.onerror = () => { flipImg.alt = 'Plot not available.'; };
-        flipBlock.appendChild(flipTitle);
-        flipBlock.appendChild(flipImg);
-        plotsContainer.appendChild(flipBlock);
-
-        // 4. Attach toggle handler
-        if (filterToggle) {
-            filterToggle.addEventListener('change', () => {
-                localStorage.setItem('filterByCorruption', filterToggle.checked ? '1' : '0');
-                updatePlotsView();
-            });
-        }
-
-        // 5. Initial selection highlight and content
-        updateAllViews();
-    }
-
-    function initializeArchitecture() {
-        if (!archUseCaseThumbs || !archPlotsContainer) return;
-
-        // Thumbnails
-        archUseCaseThumbs.innerHTML = '';
-        useCases.forEach(useCase => {
-            const thumb = createUseCaseThumbnail(useCase, () => {
-                currentArchUseCase = useCase;
-                updateArchitectureUseCaseHeading();
-                updateArchitectureActiveThumb();
-                ensureArchFilterToggleState();
-            });
-            archUseCaseThumbs.appendChild(thumb);
-        });
-
-        // Restore persisted architecture toggle
-        if (archFilterToggle) {
-            const saved = localStorage.getItem('archFilterByCorruption');
-            if (saved === '1' || saved === '0') {
-                archFilterToggle.checked = saved === '1';
-            }
-        }
-
-        // Plots container content
-        archPlotsContainer.innerHTML = '';
-
-        const accBlock = document.createElement('div');
-        accBlock.className = 'plot-block';
-        const accTitle = document.createElement('h3');
-        accTitle.textContent = 'Balanced Accuracy';
-        const accImg = document.createElement('img');
-        accImg.id = 'arch-acc-plot';
-        accImg.onerror = () => { accImg.alt = 'Plot not available.'; };
-        accBlock.appendChild(accTitle);
-        accBlock.appendChild(accImg);
-        archPlotsContainer.appendChild(accBlock);
-
-        const flipBlock = document.createElement('div');
-        flipBlock.className = 'plot-block';
-        const flipTitle = document.createElement('h3');
-        flipTitle.textContent = 'Label Flip Probability';
-        const flipImg = document.createElement('img');
-        flipImg.id = 'arch-flip-plot';
-        flipImg.onerror = () => { flipImg.alt = 'Plot not available.'; };
-        flipBlock.appendChild(flipTitle);
-        flipBlock.appendChild(flipImg);
-        archPlotsContainer.appendChild(flipBlock);
-
-        // Toggle handler
-        if (archFilterToggle) {
-            archFilterToggle.addEventListener('change', () => {
-                localStorage.setItem('archFilterByCorruption', archFilterToggle.checked ? '1' : '0');
-                updateArchitecturePlotsView();
-            });
-        }
-
-        // Initial state
-        updateArchitectureUseCaseHeading();
-        updateArchitectureActiveThumb();
-        ensureArchFilterToggleState();
-    }
-
-    function initializePretraining() {
-        if (!pretrainingUseCaseThumbs || !pretrainingPlotsContainer) return;
-
-        // Thumbnails
-        pretrainingUseCaseThumbs.innerHTML = '';
-        useCases.forEach(useCase => {
-            const thumb = createUseCaseThumbnail(useCase, () => {
-                currentPretrainingUseCase = useCase;
-                updatePretrainingUseCaseHeading();
-                updatePretrainingActiveThumb();
-                ensurePretrainingFilterToggleState();
-            });
-            pretrainingUseCaseThumbs.appendChild(thumb);
-        });
-
-        // Restore persisted pretraining toggle
-        if (pretrainingFilterToggle) {
-            const saved = localStorage.getItem('pretrainingFilterByCorruption');
-            if (saved === '1' || saved === '0') {
-                pretrainingFilterToggle.checked = saved === '1';
-            }
-        }
-
-        // Plots container content
-        pretrainingPlotsContainer.innerHTML = '';
-
-        const accBlock = document.createElement('div');
-        accBlock.className = 'plot-block';
-        const accTitle = document.createElement('h3');
-        accTitle.textContent = 'Balanced Accuracy';
-        const accImg = document.createElement('img');
-        accImg.id = 'pretraining-acc-plot';
-        accImg.onerror = () => { accImg.alt = 'Plot not available.'; };
-        accBlock.appendChild(accTitle);
-        accBlock.appendChild(accImg);
-        pretrainingPlotsContainer.appendChild(accBlock);
-
-        const flipBlock = document.createElement('div');
-        flipBlock.className = 'plot-block';
-        const flipTitle = document.createElement('h3');
-        flipTitle.textContent = 'Label Flip Probability';
-        const flipImg = document.createElement('img');
-        flipImg.id = 'pretraining-flip-plot';
-        flipImg.onerror = () => { flipImg.alt = 'Plot not available.'; };
-        flipBlock.appendChild(flipTitle);
-        flipBlock.appendChild(flipImg);
-        pretrainingPlotsContainer.appendChild(flipBlock);
-
-        // Toggle handler
-        if (pretrainingFilterToggle) {
-            pretrainingFilterToggle.addEventListener('change', () => {
-                localStorage.setItem('pretrainingFilterByCorruption', pretrainingFilterToggle.checked ? '1' : '0');
-                updatePretrainingPlotsView();
-            });
-        }
-
-        // Initial state
-        updatePretrainingUseCaseHeading();
-        updatePretrainingActiveThumb();
-        ensurePretrainingFilterToggleState();
     }
 
     function createThumbnail(corruptionName, onClick) {
@@ -757,15 +107,205 @@ document.addEventListener('DOMContentLoaded', () => {
         thumbnail.alt = `Thumbnail for ${corruptionName}`;
 
         const thumbFileName = thumbnailFileMap[corruptionName];
+        // First try folder-specific thumbnail then fallback to single image
         thumbnail.src = thumbFileName ? `assets/images/${corruptionName}/${thumbFileName}` : `assets/images/${corruptionName}.png`;
 
         thumbnail.onerror = () => {
+            // fallback to top-level image file
             thumbnail.src = `assets/images/${corruptionName}.png`;
             thumbnail.onerror = null;
         };
 
         thumbnail.addEventListener('click', onClick);
         return thumbnail;
+    }
+
+    function buildCorruptionGallery() {
+        topThumbnailContainer.innerHTML = '';
+        corruptions.forEach(corr => {
+            const thumb = createThumbnail(corr, () => {
+                currentCorruption = corr;
+                updateLargeImageView();
+                // Update all shared experiment plots if needed (they read currentCorruption)
+                document.querySelectorAll('.experiment').forEach(expDiv => {
+                    const ev = new Event('corruptionChanged');
+                    expDiv.dispatchEvent(ev);
+                });
+            });
+            topThumbnailContainer.appendChild(thumb);
+        });
+        updateLargeImageView();
+    }
+
+    // --- SHARED EXPERIMENT BUILDING ---
+    function createExperimentSection({ expKey, container, basePath }) {
+        // Title / selected use case
+        const title = document.createElement('h3');
+        title.id = `${expKey}-usecase-type-heading`;
+        container.appendChild(title);
+
+        // Description box
+        const descBox = document.createElement('div');
+        descBox.id = `${expKey}-usecase-description-box`;
+        const desc = document.createElement('p');
+        desc.id = `${expKey}-usecase-description`;
+        descBox.appendChild(desc);
+        container.appendChild(descBox);
+
+        // Thumbnails
+        const thumbContainer = document.createElement('div');
+        thumbContainer.id = `${expKey}-usecase-thumbnail-container`;
+        thumbContainer.classList.add('thumbnail-container');
+        container.appendChild(thumbContainer);
+
+        // Options (filter toggle)
+        const plotOptions = document.createElement('div');
+        plotOptions.className = 'plot-options';
+        plotOptions.innerHTML = `
+            <label><input type="checkbox" id="${expKey}-filter-by-corruption"> Show only selected corruption</label>
+            <span id="${expKey}-plot-context-label" class="plot-context-label"></span>
+        `;
+        container.appendChild(plotOptions);
+
+        // Plots
+        const plots = document.createElement('div');
+        plots.id = `${expKey}-plots-container`;
+        plots.className = 'plots-container';
+        plots.innerHTML = `
+            <div class="plot-block">
+                <h3>Balanced Accuracy</h3>
+                <img id="${expKey}-acc-plot" alt="Balanced accuracy plot">
+            </div>
+            <div class="plot-block">
+                <h3>Label Flip Probability</h3>
+                <img id="${expKey}-flip-plot" alt="Label flip probability plot">
+            </div>
+        `;
+        container.appendChild(plots);
+
+        initializeSharedExperimentLogic(expKey, basePath);
+    }
+
+    function initializeSharedExperimentLogic(expKey, basePath) {
+        const heading = document.getElementById(`${expKey}-usecase-type-heading`);
+        const thumbs = document.getElementById(`${expKey}-usecase-thumbnail-container`);
+        const desc = document.getElementById(`${expKey}-usecase-description`);
+        const accImg = document.getElementById(`${expKey}-acc-plot`);
+        const flipImg = document.getElementById(`${expKey}-flip-plot`);
+        const filterToggle = document.getElementById(`${expKey}-filter-by-corruption`);
+        const plotContextLabelLocal = document.getElementById(`${expKey}-plot-context-label`);
+        const plotsContainerLocal = document.getElementById(`${expKey}-plots-container`);
+
+        let currentUC = 'AutonomousDriving';
+
+        // build thumbnails for use cases
+        useCases.forEach(uc => {
+            const thumb = createUseCaseThumbnail(uc, () => {
+                currentUC = uc;
+                updateUseCaseHeading();
+                updatePlots();
+            });
+            thumbs.appendChild(thumb);
+        });
+
+        // Restore persisted toggle if any
+        if (filterToggle) {
+            const saved = localStorage.getItem(`${expKey}_filterByCorruption`);
+            if (saved === '1' || saved === '0') filterToggle.checked = saved === '1';
+            filterToggle.addEventListener('change', () => {
+                localStorage.setItem(`${expKey}_filterByCorruption`, filterToggle.checked ? '1' : '0');
+                updatePlots();
+            });
+        }
+
+        // react when global corruption changes
+        const onGlobalCorrChange = () => {
+            updatePlots();
+        };
+        document.querySelectorAll('.experiment').forEach(expDiv => {
+            expDiv.addEventListener('corruptionChanged', onGlobalCorrChange);
+        });
+
+        function updateUseCaseHeading() {
+            heading.innerHTML = `Selected: <strong>${humanizeCamelCase(currentUC)}</strong>`;
+            const content = datasetSources[currentUC] || '';
+            desc.innerHTML = applyCitations(content);
+            thumbs.querySelectorAll('.thumbnail').forEach(t => {
+                t.classList.toggle('active', t.dataset.usecase === currentUC);
+            });
+        }
+
+        function updatePlots() {
+            const corr = currentCorruption;
+            const corrForFile = plotCorruptionNameMap[corr] || corr;
+
+            const combinedAcc = `${basePath}/acc_${currentUC}.png`;
+            const combinedFlip = `${basePath}/flip_${currentUC}.png`;
+            const perCorrAcc = `${basePath}/acc_${currentUC}_${corrForFile}.png`;
+            const perCorrFlip = `${basePath}/flip_${currentUC}_${corrForFile}.png`;
+
+            const showPerCorruption = !!(filterToggle && filterToggle.checked);
+            let anyFallbackUsed = false;
+
+            // Toggle side-by-side layout when showing per-corruption
+            plotsContainerLocal.classList.toggle('side-by-side', showPerCorruption);
+
+            function setWithFallback(imgEl, primary, fallback, altPrimary, altFallback) {
+                imgEl.onerror = null;
+                imgEl.src = primary;
+                imgEl.alt = altPrimary;
+                imgEl.onerror = () => {
+                    imgEl.onerror = null;
+                    imgEl.src = fallback;
+                    imgEl.alt = altFallback;
+                    anyFallbackUsed = true;
+                    updatePlotContextLabelLocal(showPerCorruption, anyFallbackUsed);
+                };
+            }
+
+            if (showPerCorruption) {
+                setWithFallback(
+                    accImg,
+                    perCorrAcc,
+                    combinedAcc,
+                    `Balanced accuracy for ${humanizeCamelCase(currentUC)} — ${humanizeCamelCase(corr)}`,
+                    `Balanced accuracy for ${humanizeCamelCase(currentUC)} (combined)`
+                );
+                setWithFallback(
+                    flipImg,
+                    perCorrFlip,
+                    combinedFlip,
+                    `Label flip probability for ${humanizeCamelCase(currentUC)} — ${humanizeCamelCase(corr)}`,
+                    `Label flip probability for ${humanizeCamelCase(currentUC)} (combined)`
+                );
+            } else {
+                accImg.onerror = null;
+                flipImg.onerror = null;
+                accImg.src = combinedAcc;
+                accImg.alt = `Balanced accuracy for ${humanizeCamelCase(currentUC)} (combined)`;
+                flipImg.src = combinedFlip;
+                flipImg.alt = `Label flip probability for ${humanizeCamelCase(currentUC)} (combined)`;
+            }
+
+            updatePlotContextLabelLocal(showPerCorruption, anyFallbackUsed);
+        }
+
+        function updatePlotContextLabelLocal(showPerCorruption, usedFallback=false) {
+            if (!plotContextLabelLocal) return;
+            if (showPerCorruption) {
+                if (usedFallback) {
+                    plotContextLabelLocal.textContent = `Per-corruption plot not available for ${humanizeCamelCase(currentCorruption)} in ${humanizeCamelCase(currentUC)} — showing combined.`;
+                } else {
+                    plotContextLabelLocal.textContent = `Showing: ${humanizeCamelCase(currentUC)} — ${humanizeCamelCase(currentCorruption)}`;
+                }
+            } else {
+                plotContextLabelLocal.textContent = '';
+            }
+        }
+
+        // initial
+        updateUseCaseHeading();
+        updatePlots();
     }
 
     function createUseCaseThumbnail(useCaseName, onClick) {
@@ -775,7 +315,6 @@ document.addEventListener('DOMContentLoaded', () => {
         thumbnail.alt = `Thumbnail for ${useCaseName}`;
         thumbnail.src = `assets/experiments/usecases/${useCaseName}_1.png`;
         thumbnail.onerror = () => {
-            // Fallback to non-indexed name if available; otherwise clear
             thumbnail.src = `assets/experiments/usecases/${useCaseName}.png`;
             thumbnail.onerror = () => { thumbnail.removeAttribute('src'); thumbnail.alt = 'Example not available.'; };
         };
@@ -783,81 +322,289 @@ document.addEventListener('DOMContentLoaded', () => {
         return thumbnail;
     }
 
-    // --- SPECIALISTS HELPERS/UPDATERS ---
-    function displayNameForDomain(domainKey) {
-        if (domainKey === 'MedicalDiagnosis') return 'Medical';
-        if (domainKey === 'SatelliteImaging') return 'Satellite';
-        return humanizeCamelCase(domainKey);
-    }
+    // --- INITIALIZATION ---
+    function initialize() {
+        buildCorruptionGallery();
 
-    function updateSpecialistsPlots() {
-        if (!specialistsAccImg || !specialistsFlipImg) return;
-        const dom = currentSpecialistsDomain;
-        specialistsAccImg.src = `assets/experiments/specialists/acc_${dom}.png`;
-        specialistsAccImg.alt = `Balanced accuracy (specialists) for ${displayNameForDomain(dom)}`;
-        specialistsAccImg.onerror = () => { specialistsAccImg.alt = 'Plot not available.'; };
-
-        specialistsFlipImg.src = `assets/experiments/specialists/flip_${dom}.png`;
-        specialistsFlipImg.alt = `Label flip probability (specialists) for ${displayNameForDomain(dom)}`;
-        specialistsFlipImg.onerror = () => { specialistsFlipImg.alt = 'Plot not available.'; };
-    }
-
-    function updateSpecialistsHeading() {
-        if (!specialistsHeading) return;
-        specialistsHeading.innerHTML = `Selected: <strong>${displayNameForDomain(currentSpecialistsDomain)}</strong>`;
-    }
-
-    function updateSpecialistsActiveThumb() {
-        if (!specialistsThumbs) return;
-        specialistsThumbs.querySelectorAll('.thumbnail').forEach(img => {
-            img.classList.toggle('active', img.dataset.domain === currentSpecialistsDomain);
+        // Create experiment sections dynamically from DOM mount points
+        document.querySelectorAll('.experiment').forEach(expDiv => {
+            const expKey = expDiv.dataset.exp;
+            const basePath = `assets/experiments/${expKey}`;
+            createExperimentSection({ expKey, container: expDiv, basePath });
         });
-    }
 
-    function updateSpecialistsView() {
-        updateSpecialistsHeading();
-        updateSpecialistsActiveThumb();
-        updateSpecialistsPlots();
-    }
+        // Removed: link-based Sources rendering; now handled by BibTeX renderer below.
 
-    function createSpecialistThumbnail(domainKey, onClick) {
-        const img = document.createElement('img');
-        img.classList.add('thumbnail');
-        img.dataset.domain = domainKey;
-        img.alt = `Thumbnail for ${displayNameForDomain(domainKey)}`;
-        // Reuse existing use-case thumbnails
-        img.src = `assets/experiments/usecases/${domainKey}_1.png`;
-        img.onerror = () => {
-            img.src = `assets/experiments/usecases/${domainKey}.png`;
-            img.onerror = () => { img.removeAttribute('src'); img.alt = 'Example not available.'; };
-        };
-        img.addEventListener('click', onClick);
-        return img;
-    }
-
-    function initializeSpecialists() {
-        if (!specialistsThumbs) return;
-        specialistsThumbs.innerHTML = '';
-        specialistsDomains.forEach(dom => {
-            const thumb = createSpecialistThumbnail(dom, () => {
-                currentSpecialistsDomain = dom;
-                updateSpecialistsView();
-            });
-            specialistsThumbs.appendChild(thumb);
+        // Apply citations to any exp-summary paragraphs (they contain ~\cite references)
+        document.querySelectorAll('p.exp-summary').forEach(p => {
+            p.innerHTML = applyCitations(p.innerHTML);
         });
-        updateSpecialistsView();
+
+        // Ensure large image view is clipped properly on first render
+        updateLargeImageView();
     }
 
-    // Kick off base and specialists sections
+    // Kick off
     initialize();
-    initializeSpecialists();
-    // Kick off architecture section
-    initializeArchitecture();
-    // Kick off pretraining section
-    initializePretraining();
-
-    // Process citations in exp-summary paragraphs
-    document.querySelectorAll('p.exp-summary').forEach(p => {
-        p.innerHTML = applyCitations(p.innerHTML);
-    });
 });
+
+
+// === Sources Section Loader ===
+
+// Utility: strip outer braces or quotes
+function stripOuter(value) {
+  if (!value) return '';
+  value = value.trim();
+  if ((value.startsWith('{') && value.endsWith('}')) || (value.startsWith('"') && value.endsWith('"'))) {
+    value = value.substring(1, value.length - 1);
+  }
+  // Remove nested brace artifacts and collapse whitespace
+  return value.replace(/[{}]/g, '').replace(/\s+/g, ' ').trim();
+}
+
+// Parse BibTeX text into an array of entries while preserving order
+function parseBibtexText(bibText) {
+  const entries = [];
+  const text = bibText
+    .split('\n')
+    .filter(line => !/^\s*(#|%|\/\/|[-]{2,}|\s*$)/.test(line)) // drop comments, separators, empty
+    .join('\n');
+
+  let i = 0;
+  const n = text.length;
+  while (i < n) {
+    // find next '@'
+    if (text[i] !== '@') { i++; continue; }
+    i++; // skip '@'
+    // read type
+    let type = '';
+    while (i < n && /[A-Za-z]/.test(text[i])) { type += text[i++]; }
+    // skip until '{'
+    while (i < n && text[i] !== '{') i++;
+    if (i >= n) break;
+    i++; // skip '{'
+
+    // read entry content until matching '}'
+    let depth = 1;
+    let content = '';
+    while (i < n && depth > 0) {
+      const ch = text[i++];
+      if (ch === '{') depth++;
+      else if (ch === '}') depth--;
+      content += ch;
+    }
+    // content currently ends with the closing '}', remove last '}' added
+    if (content.endsWith('}')) content = content.slice(0, -1);
+
+    // first token up to first comma is the key
+    let key = '';
+    let rest = '';
+    const firstCommaIdx = (() => {
+      let d = 0; // track nested for safety
+      for (let j = 0; j < content.length; j++) {
+        const c = content[j];
+        if (c === '{') d++;
+        else if (c === '}') d--;
+        else if (c === ',' && d === 0) return j;
+      }
+      return -1;
+    })();
+    if (firstCommaIdx >= 0) {
+      key = content.slice(0, firstCommaIdx).trim();
+      rest = content.slice(firstCommaIdx + 1);
+    } else {
+      key = content.trim();
+      rest = '';
+    }
+
+    // parse fields in rest
+    const fields = {};
+    const parts = [];
+    // split on commas at top level
+    (function splitTopLevel() {
+      let d = 0, current = '';
+      let inQuotes = false;
+      for (let j = 0; j < rest.length; j++) {
+        const c = rest[j];
+        if (c === '"') inQuotes = !inQuotes;
+        if (!inQuotes) {
+          if (c === '{') d++;
+          else if (c === '}') d--;
+          if (c === ',' && d === 0) {
+            parts.push(current);
+            current = '';
+            continue;
+          }
+        }
+        current += c;
+      }
+      if (current.trim()) parts.push(current);
+    })();
+
+    parts.forEach(p => {
+      const eqIdx = p.indexOf('=');
+      if (eqIdx === -1) return;
+      const name = p.slice(0, eqIdx).trim().toLowerCase();
+      const value = stripOuter(p.slice(eqIdx + 1).trim());
+      if (name) fields[name] = value;
+    });
+
+    entries.push({ type: (type || '').toLowerCase(), key, fields });
+  }
+  return entries;
+}
+
+// Format author list "A and B and C" -> "A, B and C"
+function formatAuthors(authorField) {
+  if (!authorField) return '';
+  const authors = authorField.split(/\s+and\s+/i).map(a => a.trim()).filter(Boolean);
+  if (authors.length === 0) return '';
+  if (authors.length === 1) return authors[0];
+  if (authors.length === 2) return `${authors[0]} and ${authors[1]}`;
+  return `${authors.slice(0, -1).join(', ')}, and ${authors[authors.length - 1]}`;
+}
+
+function formatPages(pages) {
+  if (!pages) return '';
+  return pages.replace(/--/g, '–');
+}
+
+// Build a plain-text, paper-style reference string without links
+function formatBibEntry(entry) {
+  const f = entry.fields;
+  const authors = formatAuthors(f.author);
+  const title = f.title ? f.title.replace(/[{}]/g, '') : '';
+  const year = f.year || '';
+  const volume = f.volume ? f.volume : '';
+  const number = f.number ? `(${f.number})` : '';
+  const pages = f.pages ? formatPages(f.pages) : '';
+  const publisher = f.publisher || '';
+  const booktitle = f.booktitle || '';
+  const journal = f.journal || '';
+  const organization = f.organization || '';
+
+  let parts = [];
+  if (authors) parts.push(authors + '.');
+  if (title) parts.push(title + '.');
+
+  switch (entry.type) {
+    case 'article':
+      if (journal) {
+        let j = journal;
+        let volIssue = volume ? (number ? `${volume}${number}` : volume) : '';
+        let jp = [];
+        jp.push(j);
+        if (volIssue) jp.push(volIssue);
+        if (pages) jp.push(pages);
+        parts.push(jp.join(', ') + '.');
+      }
+      if (year) parts.push(year + '.');
+      break;
+    case 'inproceedings':
+      if (booktitle) {
+        let conf = `In: ${booktitle}`;
+        let extras = [];
+        if (pages) extras.push(pages);
+        if (organization) extras.push(organization);
+        if (extras.length) conf += `, ${extras.join(', ')}`;
+        parts.push(conf + '.');
+      }
+      if (year) parts.push(year + '.');
+      break;
+    case 'book':
+      const pubBits = [];
+      if (publisher) pubBits.push(publisher);
+      if (year) pubBits.push(year);
+      if (pubBits.length) parts.push(pubBits.join(', ') + '.');
+      break;
+    default:
+      // Fallback: include journal or booktitle or publisher if available
+      const where = journal || booktitle || publisher || organization;
+      if (where) parts.push(where + '.');
+      if (year) parts.push(year + '.');
+  }
+
+  return parts.join(' ').replace(/\s+/g, ' ').trim();
+}
+
+// 1. Load BibTeX file
+async function loadBibtex() {
+  try {
+    const response = await fetch('assets/references.bib');
+    if (!response.ok) { console.error('Failed to load BibTeX file'); return null; }
+    return await response.text();
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+}
+
+// 4. Render Sources section (all entries, formatted, no links)
+async function renderSources() {
+  const bibtex = await loadBibtex();
+  if (!bibtex) return;
+  const entries = parseBibtexText(bibtex);
+  const container = document.getElementById('sources-list');
+  if (!container) return;
+
+  // Create ordered list like in a paper
+  const ol = document.createElement('ol');
+  ol.className = 'references-list';
+
+  // Build all <li> first
+  const items = entries.map(entry => {
+    const li = document.createElement('li');
+    li.textContent = formatBibEntry(entry);
+    return li;
+  });
+
+  // Expand/collapse behavior
+  const INITIAL_COUNT = 5; // number of items to show by default
+  const total = items.length;
+  items.forEach((li, idx) => {
+    if (idx >= INITIAL_COUNT) li.style.display = 'none';
+    ol.appendChild(li);
+  });
+
+  // Clear and append fresh content
+  container.innerHTML = '';
+  container.appendChild(ol);
+
+  if (total > INITIAL_COUNT) {
+    const controls = document.createElement('div');
+    controls.className = 'references-controls';
+
+    const summary = document.createElement('span');
+    summary.className = 'references-summary';
+    summary.textContent = `Showing ${Math.min(INITIAL_COUNT, total)} of ${total}`;
+
+    const btn = document.createElement('button');
+    btn.id = 'references-toggle';
+    btn.type = 'button';
+    btn.setAttribute('aria-expanded', 'false');
+    btn.textContent = `Show all ${total}`;
+
+    let expanded = false;
+    btn.addEventListener('click', () => {
+      expanded = !expanded;
+      if (expanded) {
+        items.forEach(li => { li.style.display = ''; });
+        btn.textContent = 'Show less';
+        btn.setAttribute('aria-expanded', 'true');
+        summary.textContent = `Showing ${total} of ${total}`;
+      } else {
+        items.forEach((li, idx) => { li.style.display = idx < INITIAL_COUNT ? '' : 'none'; });
+        btn.textContent = `Show all ${total}`;
+        btn.setAttribute('aria-expanded', 'false');
+        summary.textContent = `Showing ${Math.min(INITIAL_COUNT, total)} of ${total}`;
+      }
+    });
+
+    controls.appendChild(summary);
+    controls.appendChild(btn);
+    container.appendChild(controls);
+  }
+}
+
+// Call on load
+document.addEventListener('DOMContentLoaded', renderSources);
