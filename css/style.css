@@ -304,3 +304,28 @@ h2 {
   border-radius: 6px;
   object-fit: cover;
 }
+
+/* Graphical Abstract */
+#graphical-abstract .graphical-abstract-figure {
+  margin: 0;
+}
+#graphical-abstract img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  display: block;
+}
+#graphical-abstract figcaption {
+  color: #6c757d;
+  font-size: 0.95rem;
+  margin-top: 0.5rem;
+}
+
+/* Highlights */
+#highlights .highlights-list {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+#highlights .highlights-list li {
+  margin-bottom: 0.35rem;
+}

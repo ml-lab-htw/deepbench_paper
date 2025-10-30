@@ -16,6 +16,27 @@
         <p class="authors">Mario Koddenbrock, Rudolf Hoffmann, David Brodmann, Erik Rodner</p>
     </header>
     <main>
+        <section id="graphical-abstract">
+            <h2>Graphical Abstract</h2>
+            <figure class="graphical-abstract-figure">
+                <img src="assets/graphical_abstract.png" alt="Graphical abstract: Overview of DeepBench" />
+                <figcaption>
+                    Overview of DeepBench. (A) The user provides the model and dataset to be analyzed, plus a short, high-level domain description of the application scenario. (B) DeepBench uses this description to select a realistic stress test from a predefined set of corruptions, applying multiple types at varying severity levels to generate perturbed evaluation sets (examples in C). The VLM is evaluated on both supervised metrics (e.g., accuracy, AUC, mCE, rCE) and unsupervised metrics (e.g., label flip probability). (D) Results are aggregated across models and presented in an interactive browser-based frontend for easy comparison and analysis.
+                </figcaption>
+            </figure>
+        </section>
+
+        <section id="highlights">
+            <h2>Highlights</h2>
+            <ul class="highlights-list">
+                <li>DeepBench uses LLMs to automatically generate domain-specific corruptions.</li>
+                <li>We benchmark five VLMs and their variants across six real-world domains.</li>
+                <li>Domain-specific fine-tuning increases clean accuracy but can reduce robustness.</li>
+                <li>Larger ViTs and curated pretraining data yield greater resilience to corruption.</li>
+                <li>Label flip probability provides a reliable, annotation-free robustness proxy.</li>
+            </ul>
+        </section>
+
         <section id="abstract">
             <h2>Abstract</h2>
             <p>Robustness evaluation of computer vision and vision-language models (VLMs) remains a critical challenge, particularly when models are deployed in domain-specific settings that differ significantly from their training distributions. While existing benchmarks target generic corruptions or adversarial attacks, they offer limited insight into how models perform under realistic visual conditions, such as lighting variability in handheld photography or anatomical variation in medical imaging. Additionally, the increasing reliance on large pretrained foundation models with opaque data pipelines complicates the analysis of potential failure modes. In this work, we introduce DeepBench, a framework for evaluating domain-specific robustness without requiring labeled data. Given a high-level description of the deployment environment, a large language model (LLM) selects a context-relevant corruption set that simulates expected visual variability. The framework supports both standard accuracy-based metrics and an unsupervised measure of prediction consistency, the label-flip probability (LFP), enabling robustness analysis even in data-scarce applications. We systematically benchmark five popular VLMs—CLIP, SigLIP, ALIGN, LLaVA, and Gemma—across six real-world domains. Our results show that robustness and performance vary significantly by use case: no single model dominates across all domains. These findings underscore the importance of domain-specific evaluation, which captures failure modes that generic robustness benchmarks may overlook. Furthermore, we validate LFP as a reliable proxy for accuracy under corruption, supporting its use in label-free settings. We release our framework as open-source software on <a href="https://github.com/ml-lab-htw/deepbench" target="_blank">GitHub</a>.</p>
@@ -47,6 +68,15 @@
             <div id="usecases-content">
                 <div id="usecases-description"></div>
                 <div id="usecases-images" class="usecases-images-grid"></div>
+            </div>
+        </section>
+
+        <section id="experiments-llm-selection">
+            <h2>Can LLMs Generate Consistent and Context-Aware Corruption Strategies?</h2>
+            <p class="exp-summary" data-exp="llm-selection"><strong>Answer:</strong> Yes, LLMs produce stable, context-aware corruption sets, enabling automated domain-specific robustness evaluation. <strong>Setup:</strong> We prompted GPT‑4o (temperature 0) with each domain description and the predefined corruption list, repeating 10 runs per domain. Final sets were chosen by majority vote and sanity-checked against simple domain-specific whitelist/blacklist rules. <strong>Results:</strong> Core transforms (Brightness, Contrast, ImageRotation) are selected reliably across domains, while domain-specific choices (e.g., CloudGenerator for Satellite, Rain for Driving) reflect contextual adaptation; all final sets satisfy whitelist/blacklist constraints.</p>
+            <div class="plot-block">
+                <h3>Corruption Selection Frequencies (GPT‑4o)</h3>
+                <img src="assets/experiments/augmentation_selection_gpt-4o_heatmap_flipped.png" alt="Heatmap of GPT-4o corruption selection frequencies across domains (10 runs per domain). Green = whitelist, Red = blacklist. Majority vote used for final sets." />
             </div>
         </section>
 
