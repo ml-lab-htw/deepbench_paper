@@ -56,6 +56,22 @@
         'CloudGenerator': 'Overlays or generates cloud-like textures in the image, simulating an overcast sky.'
     };
 
+    // Dynamic images manifest for corruption examples
+    const imagesManifestUrl = 'assets/images/manifest.json';
+    let imagesManifest = null;
+    async function loadImagesManifest() {
+        if (imagesManifest) return imagesManifest;
+        try {
+            const res = await fetch(imagesManifestUrl);
+            if (!res.ok) throw new Error('Failed to load images manifest');
+            imagesManifest = await res.json();
+        } catch (e) {
+            console.warn('Images manifest not available; falling back to default patterns.', e);
+            imagesManifest = {};
+        }
+        return imagesManifest;
+    }
+
     const plotCorruptionNameMap = {
         'ImageFlip': 'Flip'
     };
@@ -89,56 +105,98 @@
     }
 
     // --- UPDATE FUNCTIONS ---
-    function updateLargeImageView() {
+    async function updateLargeImageView() {
         const corruptionName = humanizeCamelCase(currentCorruption);
         corruptionTypeHeading.innerHTML = `Selected: <strong>${corruptionName}</strong>`;
         corruptionDescription.textContent = corruptionDescriptions[currentCorruption] || '';
-        // Large image path: assets/images/<Corruption>.png (or folder fallback)
-        largeImage.src = `assets/images/${currentCorruption}.png`;
-        // Activate thumbnail
+
+        // Render images from manifest or folder fallbacks
+        const container = document.getElementById('large-image-container');
+        if (container) {
+            container.innerHTML = '';
+            const manifest = await loadImagesManifest();
+            const files = (manifest[currentCorruption] || []).slice(0, 4);
+            if (files.length) {
+                files.forEach(file => {
+                    const img = document.createElement('img');
+                    img.src = `assets/images/${currentCorruption}/${file}`;
+                    img.alt = `${corruptionName} example`;
+                    img.onerror = () => { img.remove(); };
+                    container.appendChild(img);
+                });
+            } else {
+                // Fallback: try to discover 1..4 pattern
+                ['1','2','3','4'].forEach(n => {
+                    const img = document.createElement('img');
+                    img.src = `assets/images/${currentCorruption}/${currentCorruption}_${n}.png`;
+                    img.alt = `${corruptionName} example`;
+                    img.onerror = () => { img.remove(); };
+                    container.appendChild(img);
+                });
+            }
+            // Final fallback: top-level combined image if grid ended up empty
+            if (container.childElementCount === 0) {
+                const fallback = document.createElement('img');
+                fallback.src = `assets/images/${currentCorruption}.png`;
+                fallback.alt = `${corruptionName} example`;
+                container.appendChild(fallback);
+            }
+        }
+
+        // Activate thumbnail state
         document.querySelectorAll('#thumbnail-container .thumbnail').forEach(thumb => {
             thumb.classList.toggle('active', thumb.dataset.corruption === currentCorruption);
         });
     }
 
-    function createThumbnail(corruptionName, onClick) {
+    async function createThumbnail(corruptionName, onClick) {
         const thumbnail = document.createElement('img');
         thumbnail.classList.add('thumbnail');
         thumbnail.dataset.corruption = corruptionName;
         thumbnail.alt = `Thumbnail for ${corruptionName}`;
 
-        const thumbFileName = thumbnailFileMap[corruptionName];
-        // First try folder-specific thumbnail then fallback to single image
-        thumbnail.src = thumbFileName ? `assets/images/${corruptionName}/${thumbFileName}` : `assets/images/${corruptionName}.png`;
-
-        thumbnail.onerror = () => {
-            // fallback to top-level image file
-            thumbnail.src = `assets/images/${corruptionName}.png`;
-            thumbnail.onerror = null;
-        };
+        // Always show a thumbnail: start with the top-level combined image
+        const topLevel = `assets/images/${corruptionName}.png`;
+        thumbnail.src = topLevel;
 
         thumbnail.addEventListener('click', onClick);
+
+        // Try to upgrade to a folder example if available
+        try {
+            const manifest = await loadImagesManifest();
+            const rep = (manifest[corruptionName] && manifest[corruptionName][0]) || thumbnailFileMap[corruptionName] || `${corruptionName}_1.png`;
+            const candidate = `assets/images/${corruptionName}/${rep}`;
+            // Preload and swap only if it loads
+            const testImg = new Image();
+            testImg.onload = () => { thumbnail.src = candidate; };
+            testImg.onerror = () => { /* keep top-level */ };
+            testImg.src = candidate;
+        } catch (e) {
+            // keep top-level if anything goes wrong
+        }
+
         return thumbnail;
     }
 
     function buildCorruptionGallery() {
         topThumbnailContainer.innerHTML = '';
-        corruptions.forEach(corr => {
-            const thumb = createThumbnail(corr, () => {
-                currentCorruption = corr;
-                updateLargeImageView();
-                // Update all shared experiment plots if needed (they read currentCorruption)
-                document.querySelectorAll('.experiment').forEach(expDiv => {
-                    const ev = new Event('corruptionChanged');
-                    expDiv.dispatchEvent(ev);
+        // Build sequentially; createThumbnail is async to read manifest safely
+        (async () => {
+            for (const corr of corruptions) {
+                const thumb = await createThumbnail(corr, () => {
+                    currentCorruption = corr;
+                    updateLargeImageView();
+                    document.querySelectorAll('.experiment').forEach(expDiv => {
+                        const ev = new Event('corruptionChanged');
+                        expDiv.dispatchEvent(ev);
+                    });
                 });
-            });
-            topThumbnailContainer.appendChild(thumb);
-        });
-        updateLargeImageView();
+                topThumbnailContainer.appendChild(thumb);
+            }
+            updateLargeImageView();
+        })();
     }
 
-    // --- SHARED EXPERIMENT BUILDING ---
     function createExperimentSection({ expKey, container, basePath }) {
         // Title / selected use case
         const title = document.createElement('h3');
