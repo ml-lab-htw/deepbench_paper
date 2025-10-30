@@ -1,4 +1,5 @@
-document.addEventListener('DOMContentLoaded', () => {
+// DOM ready bootstrapping is defined at the end of the file; avoid wrapping twice.
+
     // --- STATE ---
     let currentCorruption = 'Brightness';
 
@@ -17,12 +18,12 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     const datasetSources = {
-        'MedicalDiagnosis': '<strong>Medical:</strong> We use eight datasets for medical domain identification, including chest X-rays~\\citep{wang2017chestx}, hand X-rays for bone age assessment~\\citep{halabi2019rsna}, knee X-rays for osteoarthritis diagnosis~\\citep{sarhan2024knee}, dental X-rays~\\citep{ali2016detection}, ultrasound images for nerve segmentation~\\citep{baby2017automatic}, breast ultrasound images~\\citep{al2020dataset}, liver fibrosis ultrasound images~\\citep{joo2013classification}, and mammography images~\\citep{lee2017curated}. Each image is labeled according to its medical domain, with 126--999 samples per class.',
-        'AutonomousDriving': '<strong>Driving:</strong> The autonomous driving dataset KITTI (Karlsruhe Institute of Technology and Toyota Technological Institute,~\\cite{geiger2012we}) consists of hours of traffic scenarios recorded with a variety of sensor modalities, including high-resolution RGB images. These images were cropped around non-overlapping object bounding boxes and re-labeled into four categories: <em>car</em>, <em>person</em>, <em>tram</em>, <em>truck</em>, with 156--4660 samples per class.',
-        'ManufacturingQuality': '<strong>Manufacturing:</strong> The MVTec anomaly detection dataset for quality control (MVTec AD,~\\cite{bergmann2019mvtec}) is repurposed as a 15-class object classification task over industrial items, with 60--391 samples per class.',
-        'PeopleRecognition': '<strong>People:</strong> The Facial Expression Recognition 2013 dataset (FER13,~\\cite{goodfellow2013challenges}) contains 35,887 grayscale face images labeled with seven emotion categories, with 751--1093 samples per class.',
-        'SatelliteImaging': '<strong>Satellite:</strong> The Aerial Image Dataset (AID,~\\cite{xia2017aid}) offers 15 scene categories (e.g., farmland, airport) with 800 high-res RGB images per class from Google Earth.',
-        'Handheld': '<strong>Handheld:</strong> Food-101~\\citep{bossard2014food} is a dataset including 101 thousand images across 101 food categories (1,000 per class), showing a range of dishes under varied real-world conditions.'
+        'MedicalDiagnosis': '<strong>Medical:</strong> Eight datasets across radiography and ultrasound provide domain labels for medical imaging [Wang, 2017; Halabi, 2019; Sarhan, 2024; Ali, 2016; Baby, 2017; Al, 2020; Joo, 2013; Lee, 2017].',
+        'AutonomousDriving': '<strong>Driving:</strong> KITTI offers diverse traffic scenes from onboard sensors; objects are cropped and relabeled into car, person, tram, and truck [Geiger, 2012].',
+        'ManufacturingQuality': '<strong>Manufacturing:</strong> MVTec AD is repurposed as a 15-class object dataset over industrial items [Bergmann, 2019].',
+        'PeopleRecognition': '<strong>People:</strong> FER13 contains 35k grayscale faces across seven emotions under varied conditions [Goodfellow, 2013].',
+        'SatelliteImaging': '<strong>Satellite:</strong> AID provides high-res aerial scenes spanning 15 categories from Google Earth [Xia, 2017].',
+        'Handheld': '<strong>Handheld:</strong> Food-101 comprises 101k images across 101 food categories in real-world handheld photography [Bossard, 2014].'
     };
 
     const useCases = [
@@ -470,12 +471,18 @@ document.addEventListener('DOMContentLoaded', () => {
     function initialize() {
         buildCorruptionGallery();
 
+        // Build the Use Cases showcase section
+        buildUseCasesSection();
+
         // Create experiment sections dynamically from DOM mount points
         document.querySelectorAll('.experiment').forEach(expDiv => {
             const expKey = expDiv.dataset.exp;
             const basePath = `assets/experiments/${expKey}`;
             createExperimentSection({ expKey, container: expDiv, basePath });
         });
+
+        // Render Sources (BibTeX) once on load
+        renderSources();
 
         // Removed: link-based Sources rendering; now handled by BibTeX renderer below.
 
@@ -518,11 +525,67 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
+
+        // Hide dataset description boxes inside experiments to focus on plots
+        document.querySelectorAll('[id$="-usecase-description-box"]').forEach(box => {
+            box.style.display = 'none';
+        });
     }
 
-    // Kick off
-    initialize();
-});
+    // Build Use Cases section: description and 4-image grid for selected use case
+    function buildUseCasesSection() {
+        const thumbContainer = document.getElementById('usecases-thumbnail-container');
+        const descEl = document.getElementById('usecases-description');
+        const imagesGrid = document.getElementById('usecases-images');
+        if (!thumbContainer || !descEl || !imagesGrid) return;
+
+        let selectedUC = 'AutonomousDriving';
+
+        function renderUseCase() {
+            const content = datasetSources[selectedUC] || '';
+            descEl.innerHTML = applyCitations(content);
+            renderUseCaseImages(selectedUC, imagesGrid);
+            thumbContainer.querySelectorAll('.thumbnail').forEach(t => {
+                t.classList.toggle('active', t.dataset.usecase === selectedUC);
+            });
+        }
+
+        // Build thumbnails for all use cases
+        useCases.forEach(uc => {
+            const thumb = document.createElement('img');
+            thumb.classList.add('thumbnail');
+            thumb.dataset.usecase = uc;
+            thumb.alt = `Thumbnail for ${uc}`;
+            // Reuse existing example thumbnails
+            thumb.src = `assets/experiments/usecases/${uc}_1.png`;
+            thumb.onerror = () => {
+                thumb.src = `assets/experiments/usecases/${uc}.png`;
+                thumb.onerror = () => { thumb.removeAttribute('src'); thumb.alt = 'Example not available.'; };
+            };
+            thumb.addEventListener('click', () => { selectedUC = uc; renderUseCase(); });
+            thumbContainer.appendChild(thumb);
+        });
+
+        renderUseCase();
+    }
+
+    function renderUseCaseImages(uc, gridEl) {
+        gridEl.innerHTML = '';
+        // Try to load four images for the dataset use case
+        const candidates = [
+            `assets/experiments/usecases/${uc}_1.png`,
+            `assets/experiments/usecases/${uc}_2.png`,
+            `assets/experiments/usecases/${uc}_3.png`,
+            `assets/experiments/usecases/${uc}_4.png`,
+        ];
+        candidates.forEach(src => {
+            const img = document.createElement('img');
+            img.src = src;
+            img.alt = `${uc} example`;
+            img.onerror = () => { img.remove(); };
+            gridEl.appendChild(img);
+        });
+    }
 
 
 // === Sources Section Loader ===
@@ -783,4 +846,7 @@ async function renderSources() {
 }
 
 // Call on load
-document.addEventListener('DOMContentLoaded', renderSources);
+document.addEventListener('DOMContentLoaded', () => {
+    renderSources();
+    initialize();
+});

@@ -42,6 +42,16 @@
             </div>
         </section>
 
+        <section id="usecases">
+            <h2>Use Cases</h2>
+            <p id="usecases-summary">DeepBench covers six application scenarios—Medical, Driving, Manufacturing, People, Satellite, and Handheld—spanning diverse imaging conditions and robustness challenges. New scenarios can be added by providing a short domain description; an LLM translates it into a tailored set of corruption transformations.</p>
+            <div id="usecases-thumbnail-container" class="thumbnail-container"></div>
+            <div id="usecases-content">
+                <div id="usecases-description"></div>
+                <div id="usecases-images" class="usecases-images-grid"></div>
+            </div>
+        </section>
+
         <section id="experiments">
             <h2>How Robust Are Foundation VLMs to Domain-Specific Corruptions?</h2>
             <p class="exp-summary" data-exp="main"><strong>Answer:</strong> No single VLM is universally robust. CLIP shows the strongest average corruption robustness, Gemma follows closely, and LLaVA achieves the lowest flip rate. Robustness still varies substantially across domains and corruption types, underscoring the need for domain-specific evaluation. <strong>Setup:</strong> We evaluate five pretrained VLMs (CLIP, SigLIP, ALIGN, LLaVA, Gemma) in zero-shot across six real-world domains, each with its domain-specific corruption set and multiple severity levels. We report balanced accuracy and label flip probability.</p>

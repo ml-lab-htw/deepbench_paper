@@ -270,3 +270,23 @@ h2 {
     flex-wrap: wrap;
   }
 }
+
+/* Use Cases section */
+#usecases #usecases-content {
+  margin-top: 1rem;
+}
+.usecases-images-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+.usecases-images-grid img {
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  object-fit: cover;
+}
+#usecases-description {
+  color: #495057;
+}
