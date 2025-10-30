@@ -42,10 +42,10 @@ header h1 {
 
 header.scrolled h1 {
   transform: translateY(-2px);
-  font-size: clamp(0.9rem, 4.25vw, 1.2rem); /* responsive small title */
+  font-size: clamp(0.9rem, 4.25vw, 2.0rem); /* responsive small title */
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+  text-overflow: clip;
 }
 
 header.scrolled h1 br {
@@ -58,7 +58,7 @@ header.scrolled .affiliations {
 }
 
 .small-of {
-  font-size: 2.0rem; /* slightly smaller than surrounding title text */
+  font-size: 1.7rem; /* slightly smaller than surrounding title text */
 }
 
 header .site-nav {
