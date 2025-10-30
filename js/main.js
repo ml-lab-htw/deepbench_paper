@@ -869,3 +869,72 @@ document.addEventListener('DOMContentLoaded', () => {
     renderSources();
     initialize();
 });
+function setupStickyThumbnailsAcrossExperiments() {
+        const startEl = document.getElementById('corruptions-gallery');
+        const endEl = document.getElementById('experiments-correlation');
+        const bar = topThumbnailContainer;
+        const mainEl = document.querySelector('main');
+        const headerEl = document.querySelector('header');
+        if (!startEl || !endEl || !bar || !mainEl) return;
+
+        let spacer = null;
+        function addSpacer() {
+            if (!spacer) {
+                spacer = document.createElement('div');
+                spacer.style.width = '100%';
+                bar.parentNode.insertBefore(spacer, bar);
+            }
+            spacer.style.height = `${bar.offsetHeight}px`;
+        }
+        function removeSpacer() {
+            if (spacer && spacer.parentNode) spacer.parentNode.removeChild(spacer);
+            spacer = null;
+        }
+        function updateBarWidthPosition() {
+            const mainRect = mainEl.getBoundingClientRect();
+            bar.style.width = `${mainRect.width}px`;
+            bar.style.left = `${mainRect.left}px`;
+            bar.style.transform = 'none';
+            // Offset below header height
+            const h = headerEl ? headerEl.getBoundingClientRect().height : 0;
+            bar.style.top = `${Math.max(0, h)}px`;
+        }
+
+        function onScroll() {
+            // Toggle header shrink state
+            if (headerEl) {
+                if (window.scrollY > 20) headerEl.classList.add('scrolled');
+                else headerEl.classList.remove('scrolled');
+            }
+            const startRect = startEl.getBoundingClientRect();
+            const endRect = endEl.getBoundingClientRect();
+            const shouldStick = startRect.top <= 0 && endRect.bottom > 0;
+            if (shouldStick) {
+                if (!bar.classList.contains('is-stuck')) {
+                    addSpacer();
+                    bar.classList.add('is-stuck');
+                    updateBarWidthPosition();
+                } else {
+                    // keep spacer height updated if images/layout changed
+                    if (spacer) spacer.style.height = `${bar.offsetHeight}px`;
+                    updateBarWidthPosition();
+                }
+            } else {
+                if (bar.classList.contains('is-stuck')) {
+                    bar.classList.remove('is-stuck');
+                    bar.style.width = '';
+                    bar.style.left = '';
+                    bar.style.transform = '';
+                    bar.style.top = '';
+                    removeSpacer();
+                }
+            }
+        }
+        const onResize = () => {
+            if (bar.classList.contains('is-stuck')) updateBarWidthPosition();
+            onScroll();
+        };
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', onResize);
+    }
