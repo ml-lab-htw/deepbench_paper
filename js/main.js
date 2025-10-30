@@ -195,6 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const filterToggle = document.getElementById(`${expKey}-filter-by-corruption`);
         const plotContextLabelLocal = document.getElementById(`${expKey}-plot-context-label`);
         const plotsContainerLocal = document.getElementById(`${expKey}-plots-container`);
+        const descBoxEl = document.getElementById(`${expKey}-usecase-description-box`);
 
         let currentUC = 'AutonomousDriving';
 
@@ -303,9 +304,63 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        // Stabilize description box height to avoid layout jumping
+        function computeAndSetStableDescHeight() {
+            if (!descBoxEl) return;
+            const cs = window.getComputedStyle(descBoxEl);
+            const width = descBoxEl.clientWidth || parseFloat(cs.width) || 0;
+            if (!width) return; // can't measure yet
+
+            const measure = document.createElement('div');
+            measure.style.position = 'absolute';
+            measure.style.left = '-10000px';
+            measure.style.top = '0';
+            measure.style.visibility = 'hidden';
+            measure.style.pointerEvents = 'none';
+            measure.style.width = width + 'px';
+            // mirror key typography/padding
+            measure.style.fontFamily = cs.fontFamily;
+            measure.style.fontSize = cs.fontSize;
+            measure.style.fontWeight = cs.fontWeight;
+            measure.style.lineHeight = cs.lineHeight;
+            measure.style.paddingTop = cs.paddingTop;
+            measure.style.paddingBottom = cs.paddingBottom;
+            measure.style.paddingLeft = cs.paddingLeft;
+            measure.style.paddingRight = cs.paddingRight;
+
+            const p = document.createElement('p');
+            measure.appendChild(p);
+            document.body.appendChild(measure);
+
+            let maxInner = 0;
+            useCases.forEach(uc => {
+                const txt = applyCitations(datasetSources[uc] || '');
+                p.innerHTML = txt;
+                // Force reflow and measure
+                const h = p.offsetHeight;
+                if (h > maxInner) maxInner = h;
+            });
+
+            const padTop = parseFloat(cs.paddingTop) || 0;
+            const padBottom = parseFloat(cs.paddingBottom) || 0;
+            const targetMin = Math.ceil(maxInner + padTop + padBottom);
+            descBoxEl.style.minHeight = targetMin + 'px';
+
+            // cleanup
+            document.body.removeChild(measure);
+        }
+        // simple debounce
+        function debounce(fn, wait=150) {
+            let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), wait); };
+        }
+
+        const recomputeStableHeight = debounce(() => computeAndSetStableDescHeight(), 150);
+
         // initial
         updateUseCaseHeading();
         updatePlots();
+        computeAndSetStableDescHeight();
+        window.addEventListener('resize', recomputeStableHeight);
     }
 
     function createUseCaseThumbnail(useCaseName, onClick) {
