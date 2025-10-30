@@ -4,7 +4,6 @@
     let currentCorruption = 'Brightness';
 
     // --- DOM ELEMENTS ---
-    const largeImage = document.getElementById('large-image');
     const corruptionTypeHeading = document.getElementById('corruption-type-heading');
     const corruptionDescription = document.getElementById('corruption-description');
     const topThumbnailContainer = document.getElementById('thumbnail-container');
