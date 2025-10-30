@@ -161,7 +161,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Options (filter toggle)
         const plotOptions = document.createElement('div');
         plotOptions.className = 'plot-options';
-        plotOptions.innerHTML = `
+        // For correlation experiment, there is no per-corruption toggle
+        plotOptions.innerHTML = (expKey === 'correlation')
+            ? `<span id="${expKey}-plot-context-label" class="plot-context-label"></span>`
+            : `
             <label><input type="checkbox" id="${expKey}-filter-by-corruption"> Show only selected corruption</label>
             <span id="${expKey}-plot-context-label" class="plot-context-label"></span>
         `;
@@ -171,16 +174,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const plots = document.createElement('div');
         plots.id = `${expKey}-plots-container`;
         plots.className = 'plots-container';
-        plots.innerHTML = `
-            <div class="plot-block">
-                <h3>Balanced Accuracy</h3>
-                <img id="${expKey}-acc-plot" alt="Balanced accuracy plot">
-            </div>
-            <div class="plot-block">
-                <h3 id="${expKey}-second-plot-title">Label Flip Probability</h3>
-                <img id="${expKey}-flip-plot" alt="Label flip probability plot">
-            </div>
-        `;
+        if (expKey === 'correlation') {
+            plots.innerHTML = `
+                <div class="plot-block">
+                    <h3>Correlation between LFP and Accuracy</h3>
+                    <img id="${expKey}-corr-plot" alt="Correlation plot">
+                </div>
+            `;
+        } else {
+            plots.innerHTML = `
+                <div class="plot-block">
+                    <h3>Balanced Accuracy</h3>
+                    <img id="${expKey}-acc-plot" alt="Balanced accuracy plot">
+                </div>
+                <div class="plot-block">
+                    <h3 id="${expKey}-second-plot-title">Label Flip Probability</h3>
+                    <img id="${expKey}-flip-plot" alt="Label flip probability plot">
+                </div>
+            `;
+        }
         container.appendChild(plots);
 
         initializeSharedExperimentLogic(expKey, basePath);
@@ -192,6 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const desc = document.getElementById(`${expKey}-usecase-description`);
         const accImg = document.getElementById(`${expKey}-acc-plot`);
         const flipImg = document.getElementById(`${expKey}-flip-plot`);
+        const corrImg = document.getElementById(`${expKey}-corr-plot`);
         const filterToggle = document.getElementById(`${expKey}-filter-by-corruption`);
         const plotContextLabelLocal = document.getElementById(`${expKey}-plot-context-label`);
         const plotsContainerLocal = document.getElementById(`${expKey}-plots-container`);
@@ -215,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
             thumbs.appendChild(thumb);
         });
 
-        // Restore persisted toggle if any
+        // Restore persisted toggle if any (non-correlation only)
         if (filterToggle) {
             const saved = localStorage.getItem(`${expKey}_filterByCorruption`);
             if (saved === '1' || saved === '0') filterToggle.checked = saved === '1';
@@ -225,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // react when global corruption changes
+        // react when global corruption changes (non-correlation only)
         const onGlobalCorrChange = () => {
             updatePlots();
         };
@@ -245,6 +258,18 @@ document.addEventListener('DOMContentLoaded', () => {
         function updatePlots() {
             const corr = currentCorruption;
             const corrForFile = plotCorruptionNameMap[corr] || corr;
+
+            if (expKey === 'correlation') {
+                // Correlation plot lives under main experiment assets path
+                const corrPath = `assets/experiments/main/correlation_${currentUC}.png`;
+                if (corrImg) {
+                    corrImg.onerror = null;
+                    corrImg.src = corrPath;
+                    corrImg.alt = `Correlation between LFP and Accuracy for ${humanizeCamelCase(currentUC)}`;
+                }
+                if (plotContextLabelLocal) plotContextLabelLocal.textContent = '';
+                return;
+            }
 
             // Configure second plot depending on experiment
             const secondPrefix = (expKey === 'pretraining') ? 'mce' : 'flip';
