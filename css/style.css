@@ -382,3 +382,9 @@ body.coming-soon-active #coming-soon-overlay .coming-soon-content {
   display: block;
   margin: 0 auto 0.75rem auto;
 }
+
+/* Hide any per-experiment use case headings/descriptions */
+.experiment [id$="-usecase-type-heading"],
+.experiment [id$="-usecase-description-box"] {
+  display: none !important;
+}

@@ -208,318 +208,247 @@
     }
 
     function createExperimentSection({ expKey, container, basePath }) {
-        // Title / selected use case
-        const title = document.createElement('h3');
-        title.id = `${expKey}-usecase-type-heading`;
-        container.appendChild(title);
+        // No heading/description — only thumbnails and plots in experiments
 
-        // Description box
-        const descBox = document.createElement('div');
-        descBox.id = `${expKey}-usecase-description-box`;
-        const desc = document.createElement('p');
-        desc.id = `${expKey}-usecase-description`;
-        descBox.appendChild(desc);
-        container.appendChild(descBox);
+         // Thumbnails
+         const thumbContainer = document.createElement('div');
+         thumbContainer.id = `${expKey}-usecase-thumbnail-container`;
+         thumbContainer.classList.add('thumbnail-container');
+         container.appendChild(thumbContainer);
 
-        // Thumbnails
-        const thumbContainer = document.createElement('div');
-        thumbContainer.id = `${expKey}-usecase-thumbnail-container`;
-        thumbContainer.classList.add('thumbnail-container');
-        container.appendChild(thumbContainer);
+         // Options (filter toggle)
+         const plotOptions = document.createElement('div');
+         plotOptions.className = 'plot-options';
+         // For correlation experiment, there is no per-corruption toggle
+         plotOptions.innerHTML = (expKey === 'correlation')
+             ? `<span id="${expKey}-plot-context-label" class="plot-context-label"></span>`
+             : `
+             <label><input type="checkbox" id="${expKey}-filter-by-corruption"> Show only selected corruption</label>
+             <span id="${expKey}-plot-context-label" class="plot-context-label"></span>
+         `;
+         container.appendChild(plotOptions);
 
-        // Options (filter toggle)
-        const plotOptions = document.createElement('div');
-        plotOptions.className = 'plot-options';
-        // For correlation experiment, there is no per-corruption toggle
-        plotOptions.innerHTML = (expKey === 'correlation')
-            ? `<span id="${expKey}-plot-context-label" class="plot-context-label"></span>`
-            : `
-            <label><input type="checkbox" id="${expKey}-filter-by-corruption"> Show only selected corruption</label>
-            <span id="${expKey}-plot-context-label" class="plot-context-label"></span>
-        `;
-        container.appendChild(plotOptions);
+         // Plots
+         const plots = document.createElement('div');
+         plots.id = `${expKey}-plots-container`;
+         plots.className = 'plots-container';
+         if (expKey === 'correlation') {
+             plots.innerHTML = `
+                 <div class="plot-block">
+                     <h3>Correlation between LFP and Accuracy</h3>
+                     <img id="${expKey}-corr-plot" alt="Correlation plot">
+                 </div>
+             `;
+         } else {
+             plots.innerHTML = `
+                 <div class="plot-block">
+                     <h3>Balanced Accuracy</h3>
+                     <img id="${expKey}-acc-plot" alt="Balanced accuracy plot">
+                 </div>
+                 <div class="plot-block">
+                     <h3 id="${expKey}-second-plot-title">Label Flip Probability</h3>
+                     <img id="${expKey}-flip-plot" alt="Label flip probability plot">
+                 </div>
+             `;
+         }
+         container.appendChild(plots);
 
-        // Plots
-        const plots = document.createElement('div');
-        plots.id = `${expKey}-plots-container`;
-        plots.className = 'plots-container';
-        if (expKey === 'correlation') {
-            plots.innerHTML = `
-                <div class="plot-block">
-                    <h3>Correlation between LFP and Accuracy</h3>
-                    <img id="${expKey}-corr-plot" alt="Correlation plot">
-                </div>
-            `;
-        } else {
-            plots.innerHTML = `
-                <div class="plot-block">
-                    <h3>Balanced Accuracy</h3>
-                    <img id="${expKey}-acc-plot" alt="Balanced accuracy plot">
-                </div>
-                <div class="plot-block">
-                    <h3 id="${expKey}-second-plot-title">Label Flip Probability</h3>
-                    <img id="${expKey}-flip-plot" alt="Label flip probability plot">
-                </div>
-            `;
-        }
-        container.appendChild(plots);
-
-        initializeSharedExperimentLogic(expKey, basePath);
-    }
+         initializeSharedExperimentLogic(expKey, basePath);
+     }
 
     function initializeSharedExperimentLogic(expKey, basePath) {
-        const heading = document.getElementById(`${expKey}-usecase-type-heading`);
-        const thumbs = document.getElementById(`${expKey}-usecase-thumbnail-container`);
-        const desc = document.getElementById(`${expKey}-usecase-description`);
-        const accImg = document.getElementById(`${expKey}-acc-plot`);
-        const flipImg = document.getElementById(`${expKey}-flip-plot`);
-        const corrImg = document.getElementById(`${expKey}-corr-plot`);
-        const filterToggle = document.getElementById(`${expKey}-filter-by-corruption`);
-        const plotContextLabelLocal = document.getElementById(`${expKey}-plot-context-label`);
-        const plotsContainerLocal = document.getElementById(`${expKey}-plots-container`);
-        const descBoxEl = document.getElementById(`${expKey}-usecase-description-box`);
-        const secondPlotTitleEl = document.getElementById(`${expKey}-second-plot-title`);
+         const thumbs = document.getElementById(`${expKey}-usecase-thumbnail-container`);
+         const accImg = document.getElementById(`${expKey}-acc-plot`);
+         const flipImg = document.getElementById(`${expKey}-flip-plot`);
+         const corrImg = document.getElementById(`${expKey}-corr-plot`);
+         const filterToggle = document.getElementById(`${expKey}-filter-by-corruption`);
+         const plotContextLabelLocal = document.getElementById(`${expKey}-plot-context-label`);
+         const plotsContainerLocal = document.getElementById(`${expKey}-plots-container`);
+         const secondPlotTitleEl = document.getElementById(`${expKey}-second-plot-title`);
 
-        // Determine which use cases to show for this experiment
-        const ucList = (expKey === 'specialists')
-          ? ['MedicalDiagnosis', 'SatelliteImaging']
-          : useCases;
+         // Determine which use cases to show for this experiment
+         const ucList = (expKey === 'specialists')
+           ? ['MedicalDiagnosis', 'SatelliteImaging']
+           : useCases;
 
-        let currentUC = ucList[0];
+         let currentUC = ucList[0];
 
-        // build thumbnails for use cases
-        ucList.forEach(uc => {
-            const thumb = createUseCaseThumbnail(uc, () => {
-                currentUC = uc;
-                updateUseCaseHeading();
-                updatePlots();
-            });
-            thumbs.appendChild(thumb);
-        });
+         // build thumbnails for use cases
+         ucList.forEach(uc => {
+             const thumb = createUseCaseThumbnail(uc, () => {
+                 currentUC = uc;
+                 updatePlots();
+             });
+             thumbs.appendChild(thumb);
+         });
 
-        // Restore persisted toggle if any (non-correlation only)
-        if (filterToggle) {
-            const saved = localStorage.getItem(`${expKey}_filterByCorruption`);
-            if (saved === '1' || saved === '0') filterToggle.checked = saved === '1';
-            filterToggle.addEventListener('change', () => {
-                localStorage.setItem(`${expKey}_filterByCorruption`, filterToggle.checked ? '1' : '0');
-                updatePlots();
-            });
-        }
+         // Restore persisted toggle if any (non-correlation only)
+         if (filterToggle) {
+             const saved = localStorage.getItem(`${expKey}_filterByCorruption`);
+             if (saved === '1' || saved === '0') filterToggle.checked = saved === '1';
+             filterToggle.addEventListener('change', () => {
+                 localStorage.setItem(`${expKey}_filterByCorruption`, filterToggle.checked ? '1' : '0');
+                 updatePlots();
+             });
+         }
 
-        // react when global corruption changes (non-correlation only)
-        const onGlobalCorrChange = () => {
-            updatePlots();
-        };
-        document.querySelectorAll('.experiment').forEach(expDiv => {
-            expDiv.addEventListener('corruptionChanged', onGlobalCorrChange);
-        });
+         // react when global corruption changes (non-correlation only)
+         const onGlobalCorrChange = () => {
+             updatePlots();
+         };
+         document.querySelectorAll('.experiment').forEach(expDiv => {
+             expDiv.addEventListener('corruptionChanged', onGlobalCorrChange);
+         });
 
-        function updateUseCaseHeading() {
-            heading.innerHTML = `Selected: <strong>${humanizeCamelCase(currentUC)}</strong>`;
-            const content = datasetSources[currentUC] || '';
-            desc.innerHTML = applyCitations(content);
-            thumbs.querySelectorAll('.thumbnail').forEach(t => {
-                t.classList.toggle('active', t.dataset.usecase === currentUC);
-            });
-        }
+         function updateUseCaseSelection() {
+             thumbs.querySelectorAll('.thumbnail').forEach(t => {
+                 t.classList.toggle('active', t.dataset.usecase === currentUC);
+             });
+         }
 
-        function updatePlots() {
-            const corr = currentCorruption;
-            const corrForFile = plotCorruptionNameMap[corr] || corr;
+         function updatePlots() {
+             const corr = currentCorruption;
+             const corrForFile = plotCorruptionNameMap[corr] || corr;
 
-            if (expKey === 'correlation') {
-                // Correlation plot lives under main experiment assets path
-                const corrPath = `assets/experiments/main/correlation_${currentUC}.png`;
-                if (corrImg) {
-                    corrImg.onerror = null;
-                    corrImg.src = corrPath;
-                    corrImg.alt = `Correlation between LFP and Accuracy for ${humanizeCamelCase(currentUC)}`;
-                }
-                if (plotContextLabelLocal) plotContextLabelLocal.textContent = '';
-                return;
-            }
+             if (expKey === 'correlation') {
+                 // Correlation plot lives under main experiment assets path
+                 const corrPath = `assets/experiments/main/correlation_${currentUC}.png`;
+                 if (corrImg) {
+                     corrImg.onerror = null;
+                     corrImg.src = corrPath;
+                     corrImg.alt = `Correlation between LFP and Accuracy for ${humanizeCamelCase(currentUC)}`;
+                 }
+                 if (plotContextLabelLocal) plotContextLabelLocal.textContent = '';
+                 return;
+             }
 
-            // Configure second plot depending on experiment
-            const secondPrefix = (expKey === 'pretraining') ? 'mce' : 'flip';
-            const secondTitle = (expKey === 'pretraining') ? 'Mean Corruption Error (MCE)' : 'Label Flip Probability';
-            if (secondPlotTitleEl) secondPlotTitleEl.textContent = secondTitle;
+             // Configure second plot depending on experiment
+             const secondPrefix = (expKey === 'pretraining') ? 'mce' : 'flip';
+             const secondTitle = (expKey === 'pretraining') ? 'Mean Corruption Error (MCE)' : 'Label Flip Probability';
+             if (secondPlotTitleEl) secondPlotTitleEl.textContent = secondTitle;
 
-            const combinedAcc = `${basePath}/acc_${currentUC}.png`;
-            const perCorrAcc = `${basePath}/acc_${currentUC}_${corrForFile}.png`;
+             const combinedAcc = `${basePath}/acc_${currentUC}.png`;
+             const perCorrAcc = `${basePath}/acc_${currentUC}_${corrForFile}.png`;
 
-            const combinedSecond = `${basePath}/${secondPrefix}_${currentUC}.png`;
-            const perCorrSecond = `${basePath}/${secondPrefix}_${currentUC}_${corrForFile}.png`;
+             const combinedSecond = `${basePath}/${secondPrefix}_${currentUC}.png`;
+             const perCorrSecond = `${basePath}/${secondPrefix}_${currentUC}_${corrForFile}.png`;
 
-            // Optional alternate prefix fallback (e.g., use flip when mce missing)
-            const altSecondPrefix = (secondPrefix === 'mce') ? 'flip' : null;
-            const combinedSecondAlt = altSecondPrefix ? `${basePath}/${altSecondPrefix}_${currentUC}.png` : null;
-            const perCorrSecondAlt = altSecondPrefix ? `${basePath}/${altSecondPrefix}_${currentUC}_${corrForFile}.png` : null;
+             // Optional alternate prefix fallback (e.g., use flip when mce missing)
+             const altSecondPrefix = (secondPrefix === 'mce') ? 'flip' : null;
+             const combinedSecondAlt = altSecondPrefix ? `${basePath}/${altSecondPrefix}_${currentUC}.png` : null;
+             const perCorrSecondAlt = altSecondPrefix ? `${basePath}/${altSecondPrefix}_${currentUC}_${corrForFile}.png` : null;
 
-            const showPerCorruption = !!(filterToggle && filterToggle.checked);
-            let anyFallbackUsed = false;
+             const showPerCorruption = !!(filterToggle && filterToggle.checked);
+             let anyFallbackUsed = false;
 
-            // Toggle side-by-side layout when showing per-corruption
-            plotsContainerLocal.classList.toggle('side-by-side', showPerCorruption);
+             // Toggle side-by-side layout when showing per-corruption
+             plotsContainerLocal.classList.toggle('side-by-side', showPerCorruption);
 
-            function setWithFallback(imgEl, primary, fallback, altPrimary, altFallback) {
-                imgEl.onerror = null;
-                imgEl.src = primary;
-                imgEl.alt = altPrimary;
-                imgEl.onerror = () => {
-                    imgEl.onerror = null;
-                    imgEl.src = fallback;
-                    imgEl.alt = altFallback;
-                    anyFallbackUsed = true;
-                    updatePlotContextLabelLocal(showPerCorruption, anyFallbackUsed);
-                };
-            }
+             function setWithFallback(imgEl, primary, fallback, altPrimary, altFallback) {
+                 imgEl.onerror = null;
+                 imgEl.src = primary;
+                 imgEl.alt = altPrimary;
+                 imgEl.onerror = () => {
+                     imgEl.onerror = null;
+                     imgEl.src = fallback;
+                     imgEl.alt = altFallback;
+                     anyFallbackUsed = true;
+                     updatePlotContextLabelLocal(showPerCorruption, anyFallbackUsed);
+                 };
+             }
 
-            function setWithMultiFallback(imgEl, sources, alts) {
-                let idx = 0;
-                function tryNext() {
-                    if (idx >= sources.length) return;
-                    imgEl.onerror = () => {
-                        idx++;
-                        anyFallbackUsed = true;
-                        updatePlotContextLabelLocal(showPerCorruption, anyFallbackUsed);
-                        tryNext();
-                    };
-                    imgEl.src = sources[idx];
-                    imgEl.alt = alts[idx] || '';
-                }
-                tryNext();
-            }
+             function setWithMultiFallback(imgEl, sources, alts) {
+                 let idx = 0;
+                 function tryNext() {
+                     if (idx >= sources.length) return;
+                     imgEl.onerror = () => {
+                         idx++;
+                         anyFallbackUsed = true;
+                         updatePlotContextLabelLocal(showPerCorruption, anyFallbackUsed);
+                         tryNext();
+                     };
+                     imgEl.src = sources[idx];
+                     imgEl.alt = alts[idx] || '';
+                 }
+                 tryNext();
+             }
 
-            if (showPerCorruption) {
-                // accuracy plot
-                setWithFallback(
-                    accImg,
-                    perCorrAcc,
-                    combinedAcc,
-                    `Balanced accuracy for ${humanizeCamelCase(currentUC)} — ${humanizeCamelCase(corr)}`,
-                    `Balanced accuracy for ${humanizeCamelCase(currentUC)} (combined)`
-                );
+             if (showPerCorruption) {
+                 // accuracy plot
+                 setWithFallback(
+                     accImg,
+                     perCorrAcc,
+                     combinedAcc,
+                     `Balanced accuracy for ${humanizeCamelCase(currentUC)} — ${humanizeCamelCase(corr)}`,
+                     `Balanced accuracy for ${humanizeCamelCase(currentUC)} (combined)`
+                 );
 
-                // second plot with richer fallbacks for pretraining
-                if (expKey === 'pretraining') {
-                    const sources = [perCorrSecond, combinedSecond];
-                    const alts = [
-                        `${secondTitle} for ${humanizeCamelCase(currentUC)} — ${humanizeCamelCase(corr)}`,
-                        `${secondTitle} for ${humanizeCamelCase(currentUC)} (combined)`
-                    ];
-                    if (perCorrSecondAlt) {
-                        sources.push(perCorrSecondAlt);
-                        alts.push(`Label Flip Probability for ${humanizeCamelCase(currentUC)} — ${humanizeCamelCase(corr)}`);
-                    }
-                    if (combinedSecondAlt) {
-                        sources.push(combinedSecondAlt);
-                        alts.push(`Label Flip Probability for ${humanizeCamelCase(currentUC)} (combined)`);
-                    }
-                    setWithMultiFallback(flipImg, sources, alts);
-                } else {
-                    setWithFallback(
-                        flipImg,
-                        perCorrSecond,
-                        combinedSecond,
-                        `${secondTitle} for ${humanizeCamelCase(currentUC)} — ${humanizeCamelCase(corr)}`,
-                        `${secondTitle} for ${humanizeCamelCase(currentUC)} (combined)`
-                    );
-                }
-            } else {
-                accImg.onerror = null;
-                accImg.src = combinedAcc;
-                accImg.alt = `Balanced accuracy for ${humanizeCamelCase(currentUC)} (combined)`;
+                 // second plot with richer fallbacks for pretraining
+                 if (expKey === 'pretraining') {
+                     const sources = [perCorrSecond, combinedSecond];
+                     const alts = [
+                         `${secondTitle} for ${humanizeCamelCase(currentUC)} — ${humanizeCamelCase(corr)}`,
+                         `${secondTitle} for ${humanizeCamelCase(currentUC)} (combined)`
+                     ];
+                     if (perCorrSecondAlt) {
+                         sources.push(perCorrSecondAlt);
+                         alts.push(`Label Flip Probability for ${humanizeCamelCase(currentUC)} — ${humanizeCamelCase(corr)}`);
+                     }
+                     if (combinedSecondAlt) {
+                         sources.push(combinedSecondAlt);
+                         alts.push(`Label Flip Probability for ${humanizeCamelCase(currentUC)} (combined)`);
+                     }
+                     setWithMultiFallback(flipImg, sources, alts);
+                 } else {
+                     setWithFallback(
+                         flipImg,
+                         perCorrSecond,
+                         combinedSecond,
+                         `${secondTitle} for ${humanizeCamelCase(currentUC)} — ${humanizeCamelCase(corr)}`,
+                         `${secondTitle} for ${humanizeCamelCase(currentUC)} (combined)`
+                     );
+                 }
+             } else {
+                 accImg.onerror = null;
+                 accImg.src = combinedAcc;
+                 accImg.alt = `Balanced accuracy for ${humanizeCamelCase(currentUC)} (combined)`;
 
-                if (expKey === 'pretraining') {
-                    // Try combined MCE then combined flip as fallback
-                    const sources = [combinedSecond];
-                    const alts = [`${secondTitle} for ${humanizeCamelCase(currentUC)} (combined)`];
-                    if (combinedSecondAlt) {
-                        sources.push(combinedSecondAlt);
-                        alts.push(`Label Flip Probability for ${humanizeCamelCase(currentUC)} (combined)`);
-                    }
-                    setWithMultiFallback(flipImg, sources, alts);
-                } else {
-                    flipImg.onerror = null;
-                    flipImg.src = combinedSecond;
-                    flipImg.alt = `${secondTitle} for ${humanizeCamelCase(currentUC)} (combined)`;
-                }
-            }
+                 if (expKey === 'pretraining') {
+                     // Try combined MCE then combined flip as fallback
+                     const sources = [combinedSecond];
+                     const alts = [`${secondTitle} for ${humanizeCamelCase(currentUC)} (combined)`];
+                     if (combinedSecondAlt) {
+                         sources.push(combinedSecondAlt);
+                         alts.push(`Label Flip Probability for ${humanizeCamelCase(currentUC)} (combined)`);
+                     }
+                     setWithMultiFallback(flipImg, sources, alts);
+                 } else {
+                     flipImg.onerror = null;
+                     flipImg.src = combinedSecond;
+                     flipImg.alt = `${secondTitle} for ${humanizeCamelCase(currentUC)} (combined)`;
+                 }
+             }
 
-            updatePlotContextLabelLocal(showPerCorruption, anyFallbackUsed);
-        }
+             updatePlotContextLabelLocal(showPerCorruption, anyFallbackUsed);
+         }
 
-        function updatePlotContextLabelLocal(showPerCorruption, usedFallback=false) {
-            if (!plotContextLabelLocal) return;
-            if (showPerCorruption) {
-                if (usedFallback) {
-                    plotContextLabelLocal.textContent = `Per-corruption plot not available for ${humanizeCamelCase(currentCorruption)} in ${humanizeCamelCase(currentUC)} — showing combined.`;
-                } else {
-                    plotContextLabelLocal.textContent = `Showing: ${humanizeCamelCase(currentUC)} — ${humanizeCamelCase(currentCorruption)}`;
-                }
-            } else {
-                plotContextLabelLocal.textContent = '';
-            }
-        }
+         function updatePlotContextLabelLocal(showPerCorruption, usedFallback=false) {
+             if (!plotContextLabelLocal) return;
+             if (showPerCorruption) {
+                 if (usedFallback) {
+                     plotContextLabelLocal.textContent = `Per-corruption plot not available for ${humanizeCamelCase(currentCorruption)} in ${humanizeCamelCase(currentUC)} — showing combined.`;
+                 } else {
+                     plotContextLabelLocal.textContent = `Showing: ${humanizeCamelCase(currentUC)} — ${humanizeCamelCase(currentCorruption)}`;
+                 }
+             } else {
+                 plotContextLabelLocal.textContent = '';
+             }
+         }
 
-        // Stabilize description box height to avoid layout jumping
-        function computeAndSetStableDescHeight() {
-            if (!descBoxEl) return;
-            const cs = window.getComputedStyle(descBoxEl);
-            const width = descBoxEl.clientWidth || parseFloat(cs.width) || 0;
-            if (!width) return; // can't measure yet
-
-            const measure = document.createElement('div');
-            measure.style.position = 'absolute';
-            measure.style.left = '-10000px';
-            measure.style.top = '0';
-            measure.style.visibility = 'hidden';
-            measure.style.pointerEvents = 'none';
-            measure.style.width = width + 'px';
-            // mirror key typography/padding
-            measure.style.fontFamily = cs.fontFamily;
-            measure.style.fontSize = cs.fontSize;
-            measure.style.fontWeight = cs.fontWeight;
-            measure.style.lineHeight = cs.lineHeight;
-            measure.style.paddingTop = cs.paddingTop;
-            measure.style.paddingBottom = cs.paddingBottom;
-            measure.style.paddingLeft = cs.paddingLeft;
-            measure.style.paddingRight = cs.paddingRight;
-
-            const p = document.createElement('p');
-            measure.appendChild(p);
-            document.body.appendChild(measure);
-
-            let maxInner = 0;
-            ucList.forEach(uc => {
-                p.innerHTML = applyCitations(datasetSources[uc] || '');
-                // Force reflow and measure
-                const h = p.offsetHeight;
-                if (h > maxInner) maxInner = h;
-            });
-
-            const padTop = parseFloat(cs.paddingTop) || 0;
-            const padBottom = parseFloat(cs.paddingBottom) || 0;
-            const targetMin = Math.ceil(maxInner + padTop + padBottom);
-            descBoxEl.style.minHeight = targetMin + 'px';
-
-            // cleanup
-            document.body.removeChild(measure);
-        }
-        // simple debounce
-        function debounce(fn, wait=150) {
-            let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), wait); };
-        }
-
-        const recomputeStableHeight = debounce(() => computeAndSetStableDescHeight(), 150);
-
-        // initial
-        updateUseCaseHeading();
-        updatePlots();
-        computeAndSetStableDescHeight();
-        window.addEventListener('resize', recomputeStableHeight);
-    }
+         // initial
+         updateUseCaseSelection();
+         updatePlots();
+     }
 
     function createUseCaseThumbnail(useCaseName, onClick) {
         const thumbnail = document.createElement('img');
