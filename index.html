@@ -97,6 +97,22 @@
             <div id="arch-plots-container"></div>
         </section>
 
+        <!-- New: Experiment 5 - Pretraining Data -->
+        <section id="experiments-pretraining">
+            <h2>How Does Pretraining Data Influence Robustness?</h2>
+            <p class="exp-summary"><strong>Answer:</strong> Curated, semantically aligned pretraining data yields higher accuracy and robustness than noisy corpora. OpenAI baseline excels in People due to domain alignment. <strong>Setup:</strong> Evaluate CLIP ViT-L/14 on five datasets: LAION-400M (Schuhmann et al., 2021), MetaCLIP FullCC (Xu et al., 2024), CommonPool, DataComp XL (Gadre et al., 2023), DFN2B (Fang et al., 2023), and OpenAI (Radford et al., 2021). Tested on six domains with domain-specific corruptions. <strong>Results:</strong> Curated models outperform noisy ones in accuracy and mean corruption error (mce). CommonPool tops in Driving and Manufacturing; LAION-400M lags in Medical. OpenAI leads in People, showing domain alignment matters.</p>
+
+            <h3 id="pretraining-usecase-type-heading"></h3>
+            <div id="pretraining-usecase-thumbnail-container"></div>
+
+            <div id="pretraining-plot-options" class="plot-options">
+                <label><input type="checkbox" id="pretraining-filter-by-corruption"> Show only selected corruption</label>
+                <span id="pretraining-plot-context-label" class="plot-context-label"></span>
+            </div>
+
+            <div id="pretraining-plots-container"></div>
+        </section>
+
         <section id="citation">
             <h2>How to Cite</h2>
             <pre><code>@misc{koddenbrock2025deepbench,

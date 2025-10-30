@@ -242,6 +242,12 @@ a:hover {
     margin-bottom: 2rem; /* Add space between stacked plots */
 }
 
+/* Make plot images scale to container width */
+.plot-block img {
+    width: 100%;
+    height: auto;
+}
+
 /* Ensure embedded PDF plots are visible and styled like images */
 .plot-embed {
     width: 100%;

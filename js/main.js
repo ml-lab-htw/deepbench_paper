@@ -9,6 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- STATE (Architecture) ---
     let currentArchUseCase = 'AutonomousDriving';
 
+    // --- STATE (Pretraining) ---
+    let currentPretrainingUseCase = 'AutonomousDriving';
+
     // --- DOM ELEMENTS ---
     const largeImage = document.getElementById('large-image');
     const corruptionTypeHeading = document.getElementById('corruption-type-heading');
@@ -30,6 +33,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const archPlotsContainer = document.getElementById('arch-plots-container');
     const archFilterToggle = document.getElementById('arch-filter-by-corruption');
     const archPlotContextLabel = document.getElementById('arch-plot-context-label');
+
+    // --- DOM (Pretraining) ---
+    const pretrainingUseCaseHeading = document.getElementById('pretraining-usecase-type-heading');
+    const pretrainingUseCaseThumbs = document.getElementById('pretraining-usecase-thumbnail-container');
+    const pretrainingPlotsContainer = document.getElementById('pretraining-plots-container');
+    const pretrainingFilterToggle = document.getElementById('pretraining-filter-by-corruption');
+    const pretrainingPlotContextLabel = document.getElementById('pretraining-plot-context-label');
 
     // --- DOM (Specialists) ---
     const specialistsHeading = document.getElementById('specialists-type-heading');
@@ -58,7 +68,12 @@ document.addEventListener('DOMContentLoaded', () => {
         'bergmann2019mvtec': 'https://www.mvtec.com/company/research/datasets/mvtec-ad',
         'goodfellow2013challenges': 'https://link.springer.com/chapter/10.1007/978-3-642-41340-3_8',
         'xia2017aid': 'https://ieeexplore.ieee.org/document/7926695',
-        'bossard2014food': 'https://link.springer.com/chapter/10.1007/978-3-319-10578-9_29'
+        'bossard2014food': 'https://link.springer.com/chapter/10.1007/978-3-319-10578-9_29',
+        'schuhmann2021laion': 'https://arxiv.org/abs/2111.02114',
+        'xu2024demystifying': 'https://arxiv.org/abs/2406.07577',
+        'gadre2023datacomp': 'https://arxiv.org/abs/2304.14108',
+        'fang2023data': 'https://arxiv.org/abs/2309.14319',
+        'radford2021learning': 'https://arxiv.org/abs/2103.00020'
     };
 
     const datasetSources = {
@@ -176,6 +191,29 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Ensure the PRETRAINING filter toggle state reflects availability; then update pretraining plots
+    function ensurePretrainingFilterToggleState() {
+        if (!pretrainingPlotsContainer) return Promise.resolve();
+        const uc = currentPretrainingUseCase;
+        const corr = currentCorruption;
+        const corrForFile = plotCorruptionNameMap[corr] || corr;
+
+        const perCorrAcc = `assets/experiments/pretraining/acc_${uc}_${corrForFile}.png`;
+        const perCorrFlip = `assets/experiments/pretraining/flip_${uc}_${corrForFile}.png`;
+
+        return Promise.all([imageExists(perCorrAcc), imageExists(perCorrFlip)]).then(([accOk, flipOk]) => {
+            const available = accOk && flipOk;
+            if (pretrainingFilterToggle) {
+                pretrainingFilterToggle.disabled = false;
+                pretrainingFilterToggle.title = available ? '' : 'Per-corruption plots not available for this selection (showing combined instead)';
+                if (!available && pretrainingFilterToggle.checked && pretrainingPlotContextLabel) {
+                    pretrainingPlotContextLabel.textContent = `Per-corruption plot not available for ${humanizeCamelCase(corr)} in ${humanizeCamelCase(uc)} — showing combined.`;
+                }
+            }
+            updatePretrainingPlotsView();
+        });
+    }
+
     // --- UPDATE FUNCTIONS ---
     function updateAllViews() {
         updateLargeImageView();
@@ -186,6 +224,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ensureFilterToggleState();
         // Also update architecture section (uses same selected corruption)
         ensureArchFilterToggleState();
+        // And pretraining section
+        ensurePretrainingFilterToggleState();
     }
 
     function updateLargeImageView() {
@@ -386,6 +426,92 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Pretraining section updaters
+    function updatePretrainingUseCaseHeading() {
+        if (!pretrainingUseCaseHeading) return;
+        const useCaseName = humanizeCamelCase(currentPretrainingUseCase);
+        pretrainingUseCaseHeading.innerHTML = `Selected: <strong>${useCaseName}</strong>`;
+    }
+
+    function updatePretrainingActiveThumb() {
+        if (!pretrainingUseCaseThumbs) return;
+        pretrainingUseCaseThumbs.querySelectorAll('.thumbnail').forEach(img => {
+            img.classList.toggle('active', img.dataset.usecase === currentPretrainingUseCase);
+        });
+    }
+
+    function updatePretrainingPlotsView() {
+        if (!pretrainingPlotsContainer) return;
+        const accImg = document.getElementById('pretraining-acc-plot');
+        const flipImg = document.getElementById('pretraining-flip-plot');
+        const uc = currentPretrainingUseCase;
+        const corr = currentCorruption;
+        const corrForFile = plotCorruptionNameMap[corr] || corr;
+
+        const combinedAcc = `assets/experiments/pretraining/acc_${uc}.png`;
+        const combinedFlip = `assets/experiments/pretraining/flip_${uc}.png`;
+        const perCorrAcc = `assets/experiments/pretraining/acc_${uc}_${corrForFile}.png`;
+        const perCorrFlip = `assets/experiments/pretraining/flip_${uc}_${corrForFile}.png`;
+
+        const showPerCorruption = !!(pretrainingFilterToggle && pretrainingFilterToggle.checked);
+        let anyFallbackUsed = false;
+
+        // Toggle side-by-side layout when showing per-corruption
+        pretrainingPlotsContainer.classList.toggle('side-by-side', showPerCorruption);
+
+        function setWithFallback(img, primary, fallback, altPrimary, altFallback) {
+            img.onerror = null;
+            img.src = primary;
+            img.alt = altPrimary;
+            img.onerror = () => {
+                img.onerror = null;
+                img.src = fallback;
+                img.alt = altFallback;
+                anyFallbackUsed = true;
+                updatePretrainingPlotContextLabel(showPerCorruption, uc, corr, anyFallbackUsed);
+            };
+        }
+
+        if (showPerCorruption) {
+            setWithFallback(
+                accImg,
+                perCorrAcc,
+                combinedAcc,
+                `Balanced accuracy (pretraining) for ${humanizeCamelCase(uc)} — ${humanizeCamelCase(corr)}`,
+                `Balanced accuracy (pretraining) for ${humanizeCamelCase(uc)} (combined)`
+            );
+            setWithFallback(
+                flipImg,
+                perCorrFlip,
+                combinedFlip,
+                `Label flip probability (pretraining) for ${humanizeCamelCase(uc)} — ${humanizeCamelCase(corr)}`,
+                `Label flip probability (pretraining) for ${humanizeCamelCase(uc)} (combined)`
+            );
+        } else {
+            accImg.onerror = null;
+            flipImg.onerror = null;
+            accImg.src = combinedAcc;
+            accImg.alt = `Balanced accuracy (pretraining) for ${humanizeCamelCase(uc)} (combined)`;
+            flipImg.src = combinedFlip;
+            flipImg.alt = `Label flip probability (pretraining) for ${humanizeCamelCase(uc)} (combined)`;
+        }
+
+        updatePretrainingPlotContextLabel(showPerCorruption, uc, corr, anyFallbackUsed);
+    }
+
+    function updatePretrainingPlotContextLabel(showPerCorruption, uc, corr, usedFallback = false) {
+        if (!pretrainingPlotContextLabel) return;
+        if (showPerCorruption) {
+            if (usedFallback) {
+                pretrainingPlotContextLabel.textContent = `Per-corruption plot not available for ${humanizeCamelCase(corr)} in ${humanizeCamelCase(uc)} — showing combined.`;
+            } else {
+                pretrainingPlotContextLabel.textContent = `Showing: ${humanizeCamelCase(uc)} — ${humanizeCamelCase(corr)}`;
+            }
+        } else {
+            pretrainingPlotContextLabel.textContent = '';
+        }
+    }
+
     // Measure tallest description across use cases and fix the box height
     function lockUseCaseDescriptionHeight() {
         if (!useCaseDescriptionBox) return;
@@ -562,6 +688,68 @@ document.addEventListener('DOMContentLoaded', () => {
         ensureArchFilterToggleState();
     }
 
+    function initializePretraining() {
+        if (!pretrainingUseCaseThumbs || !pretrainingPlotsContainer) return;
+
+        // Thumbnails
+        pretrainingUseCaseThumbs.innerHTML = '';
+        useCases.forEach(useCase => {
+            const thumb = createUseCaseThumbnail(useCase, () => {
+                currentPretrainingUseCase = useCase;
+                updatePretrainingUseCaseHeading();
+                updatePretrainingActiveThumb();
+                ensurePretrainingFilterToggleState();
+            });
+            pretrainingUseCaseThumbs.appendChild(thumb);
+        });
+
+        // Restore persisted pretraining toggle
+        if (pretrainingFilterToggle) {
+            const saved = localStorage.getItem('pretrainingFilterByCorruption');
+            if (saved === '1' || saved === '0') {
+                pretrainingFilterToggle.checked = saved === '1';
+            }
+        }
+
+        // Plots container content
+        pretrainingPlotsContainer.innerHTML = '';
+
+        const accBlock = document.createElement('div');
+        accBlock.className = 'plot-block';
+        const accTitle = document.createElement('h3');
+        accTitle.textContent = 'Balanced Accuracy';
+        const accImg = document.createElement('img');
+        accImg.id = 'pretraining-acc-plot';
+        accImg.onerror = () => { accImg.alt = 'Plot not available.'; };
+        accBlock.appendChild(accTitle);
+        accBlock.appendChild(accImg);
+        pretrainingPlotsContainer.appendChild(accBlock);
+
+        const flipBlock = document.createElement('div');
+        flipBlock.className = 'plot-block';
+        const flipTitle = document.createElement('h3');
+        flipTitle.textContent = 'Label Flip Probability';
+        const flipImg = document.createElement('img');
+        flipImg.id = 'pretraining-flip-plot';
+        flipImg.onerror = () => { flipImg.alt = 'Plot not available.'; };
+        flipBlock.appendChild(flipTitle);
+        flipBlock.appendChild(flipImg);
+        pretrainingPlotsContainer.appendChild(flipBlock);
+
+        // Toggle handler
+        if (pretrainingFilterToggle) {
+            pretrainingFilterToggle.addEventListener('change', () => {
+                localStorage.setItem('pretrainingFilterByCorruption', pretrainingFilterToggle.checked ? '1' : '0');
+                updatePretrainingPlotsView();
+            });
+        }
+
+        // Initial state
+        updatePretrainingUseCaseHeading();
+        updatePretrainingActiveThumb();
+        ensurePretrainingFilterToggleState();
+    }
+
     function createThumbnail(corruptionName, onClick) {
         const thumbnail = document.createElement('img');
         thumbnail.classList.add('thumbnail');
@@ -665,4 +853,11 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeSpecialists();
     // Kick off architecture section
     initializeArchitecture();
+    // Kick off pretraining section
+    initializePretraining();
+
+    // Process citations in exp-summary paragraphs
+    document.querySelectorAll('p.exp-summary').forEach(p => {
+        p.innerHTML = applyCitations(p.innerHTML);
+    });
 });
