@@ -96,6 +96,7 @@ section {
   margin-bottom: 2rem;
   border-radius: 8px;
   box-shadow: 0 4px 6px var(--shadow-color);
+  scroll-margin-top: calc(var(--header-offset, 80px) + 8px);
 }
 
 h2 {
