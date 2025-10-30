@@ -35,14 +35,14 @@ header.scrolled {
 
 header h1 {
   margin: 0 0 0.4rem 0;
-  font-size: clamp(1.25rem, 1.5vw + 1rem, 2.2rem);
+  font-size: clamp(1.1rem, 5.5vw, 2.2rem);
   line-height: 1.05;
   transition: font-size 200ms ease, transform 200ms ease;
 }
 
 header.scrolled h1 {
   transform: translateY(-2px);
-  font-size: 2.25rem; /* much smaller in sticky mode */
+  font-size: clamp(0.9rem, 4.25vw, 1.2rem); /* responsive small title */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -113,11 +113,10 @@ h2 {
   cursor: pointer;
   border: 2px solid transparent;
   border-radius: 4px;
-  transition: all 0.3s;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .thumbnail:hover {
-  transform: scale(1.05);
   border-color: #adb5bd;
 }
 
@@ -445,7 +444,4 @@ body.coming-soon-active #coming-soon-overlay .coming-soon-content {
   display: none !important;
 }
 
-#corruptions-gallery .thumbnail-container.is-stuck .thumbnail {
-  width: 32px;   /* 50% of 64px */
-  height: 32px;
-}
+/* Thumbnails keep a constant size even when sticky for smoother UX */
