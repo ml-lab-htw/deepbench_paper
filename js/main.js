@@ -538,16 +538,18 @@
     // --- INITIALIZATION ---
     function initialize() {
         buildCorruptionGallery();
-
-        // Build the Use Cases showcase section
         buildUseCasesSection();
-
-        // Create experiment sections dynamically from DOM mount points
         document.querySelectorAll('.experiment').forEach(expDiv => {
             const expKey = expDiv.dataset.exp;
             const basePath = `assets/experiments/${expKey}`;
             createExperimentSection({ expKey, container: expDiv, basePath });
         });
+
+        // Activate sticky thumbnails spanning all experiments
+        setupStickyThumbnailsAcrossExperiments();
+
+        // Toggle Coming Soon via URL or global flag
+        setupComingSoonAutoToggle();
 
         // Removed duplicate renderSources call; handled on DOMContentLoaded
         // renderSources();
@@ -597,6 +599,28 @@
             box.style.display = 'none';
         });
     }
+
+    // Coming Soon toggle helpers
+    function setComingSoon(active) {
+        document.body.classList.toggle('coming-soon-active', !!active);
+        const overlay = document.getElementById('coming-soon-overlay');
+        if (overlay) overlay.setAttribute('aria-hidden', active ? 'false' : 'true');
+    }
+    function toggleComingSoon() {
+        setComingSoon(!document.body.classList.contains('coming-soon-active'));
+    }
+    function setupComingSoonAutoToggle() {
+        const params = new URLSearchParams(window.location.search);
+        const fromParam = params.get('comingSoon');
+        const fromGlobal = typeof window.SHOW_COMING_SOON !== 'undefined' ? !!window.SHOW_COMING_SOON : null;
+        if (fromParam === '1' || fromParam === 'true') setComingSoon(true);
+        else if (fromParam === '0' || fromParam === 'false') setComingSoon(false);
+        else if (fromGlobal !== null) setComingSoon(fromGlobal);
+    }
+
+    // Expose toggle on window for easy manual control
+    window.toggleComingSoon = toggleComingSoon;
+    window.setComingSoon = setComingSoon;
 
     // Build Use Cases section: description and 4-image grid for selected use case
     function buildUseCasesSection() {
