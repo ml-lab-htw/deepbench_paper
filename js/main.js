@@ -956,3 +956,133 @@ function setupHeaderScrollBehavior() {
         window.addEventListener('resize', () => onScroll());
         onScroll();
     }
+
+// Add header background grid population (deterministic 4-row layout)
+async function populateHeaderBgGrid() {
+    const grid = document.querySelector('.header-bg-grid');
+    const headerEl = document.querySelector('header');
+    if (!grid || !headerEl) return;
+
+    // Read CSS variables
+    const rootStyles = getComputedStyle(document.documentElement);
+    const tileSizeRaw = rootStyles.getPropertyValue('--header-tile-size').trim() || '28px';
+    const gapRaw = rootStyles.getPropertyValue('--header-tile-gap').trim() || '6px';
+    const tileSize = parseFloat(tileSizeRaw);
+    const gap = parseFloat(gapRaw);
+    const rows = 4; // fixed rows requested by user
+
+    // Compute available width inside the header (subtract header horizontal padding)
+    const headerStyles = getComputedStyle(headerEl);
+    const paddingLeft = parseFloat(headerStyles.paddingLeft) || 0;
+    const paddingRight = parseFloat(headerStyles.paddingRight) || 0;
+    const availableWidth = Math.max(0, headerEl.clientWidth - paddingLeft - paddingRight);
+
+    // Determine number of columns such that tile size ~ CSS tile size and grid fills width
+    // We compute columns = floor((availableWidth + gap) / (tileSize + gap)) but ensure at least 1
+    let columns = Math.max(1, Math.floor((availableWidth + gap) / (tileSize + gap)));
+    // Cap columns to a reasonable number to avoid runaway on very wide screens
+    columns = Math.min(columns, 128);
+
+    // Set explicit grid template so there are exactly `columns` columns and `rows` rows
+    grid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+    grid.style.gridTemplateRows = `repeat(${rows}, ${tileSize}px)`;
+
+    // Determine number of tiles to render
+    const totalTiles = columns * rows;
+
+    // Build list of candidate image sources (try manifest, fallback to numeric files)
+    const exampleDir = 'assets/example_images';
+    let files = [];
+    try {
+        const manifestUrl = exampleDir + '/manifest.json';
+        const res = await fetch(manifestUrl, { cache: 'no-cache' });
+        if (res.ok) {
+            const m = await res.json();
+            if (Array.isArray(m) && m.length) files = m.map(p => exampleDir + '/' + p);
+        }
+    } catch (e) {
+        // ignore manifest errors
+    }
+    if (!files.length) {
+        // fallback numeric patterns known in repo
+        for (let i = 0; i <= 140; i++) files.push(`${exampleDir}/${i}.png`);
+        // also some original names exist; include a few common alternatives if present
+        // (we won't check existence here — broken images will simply show as broken but won't affect count)
+    }
+
+    // Prepare fragment and ensure exactly totalTiles elements
+    grid.innerHTML = '';
+    const fragment = document.createDocumentFragment();
+    for (let i = 0; i < totalTiles; i++) {
+        const src = files[i % files.length]; // cycle through candidates to fill the grid
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = '';
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        // fade-in when loaded (non-destructive)
+        img.style.opacity = '0';
+        img.addEventListener('load', () => { img.style.transition = 'opacity 220ms ease'; img.style.opacity = '1'; });
+        // do not remove on error — keep placeholder to preserve grid shape
+        img.addEventListener('error', () => { img.style.opacity = '0.12'; img.style.filter = 'grayscale(60%)'; });
+        fragment.appendChild(img);
+    }
+
+    grid.appendChild(fragment);
+
+    // Recompute on resize (debounced). Install listener once.
+    if (!window.__headerGridResizeInit) {
+        let resizeTimer = null;
+        window.addEventListener('resize', () => {
+            if (resizeTimer) clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => { populateHeaderBgGrid().catch(() => {}); }, 120);
+        });
+        window.__headerGridResizeInit = true;
+    }
+}
+
+// Ensure --primary-color-rgb is populated from --primary-color (supports #hex and rgb(...) formats)
+function ensurePrimaryColorRgb() {
+    try {
+        const root = document.documentElement;
+        const cs = getComputedStyle(root);
+        let c = cs.getPropertyValue('--primary-color').trim();
+        if (!c) return;
+        let r, g, b;
+        if (c.startsWith('#')) {
+            const hex = c.slice(1).trim();
+            if (hex.length === 3) {
+                r = parseInt(hex[0] + hex[0], 16);
+                g = parseInt(hex[1] + hex[1], 16);
+                b = parseInt(hex[2] + hex[2], 16);
+            } else if (hex.length === 6) {
+                r = parseInt(hex.slice(0,2), 16);
+                g = parseInt(hex.slice(2,4), 16);
+                b = parseInt(hex.slice(4,6), 16);
+            }
+        } else if (c.startsWith('rgb')) {
+            const parts = c.replace(/rgba?\(|\)/g, '').split(',').map(s => s.trim());
+            r = parseInt(parts[0], 10);
+            g = parseInt(parts[1], 10);
+            b = parseInt(parts[2], 10);
+        }
+        if ([r,g,b].every(v => Number.isFinite(v))) {
+            root.style.setProperty('--primary-color-rgb', `${r}, ${g}, ${b}`);
+        }
+    } catch (e) {
+        // silently ignore
+        console.warn('Failed to derive --primary-color-rgb', e);
+    }
+}
+
+// Ensure header grid populates on initialize()
+const _initialize_orig = initialize;
+initialize = function() {
+    // call original initialize logic
+    try { _initialize_orig(); } catch (e) { console.error(e); }
+    // ensure RGB var for overlay follows primary color
+    ensurePrimaryColorRgb();
+    // populate grid (don't block main rendering)
+    populateHeaderBgGrid().catch(err => { console.warn('Header grid population failed', err); });
+};
+
