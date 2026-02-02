@@ -837,12 +837,13 @@ body.coming-soon-active #coming-soon-overlay .coming-soon-content {
 .header-content .site-nav a {
     /* non-hover: use the main text color for dark text */
     color: var(--text-color);
-    background: transparent;
-    border-color: transparent;
+    background: rgba(255, 255, 255, 0.0);
+    border-color: rgba(var(--primary-color), 0.99);
     cursor: pointer;
     transition: background 180ms ease, box-shadow 220ms ease, color 140ms ease;
-    padding: 0.35rem 0.85rem;
-    border-radius: 9999px;
+    padding: 0.5rem 0.85rem;
+    border-radius: 99px;
+    border-width: 0px;
     font-weight: 600;
     font-size: 0.9rem;
 }
