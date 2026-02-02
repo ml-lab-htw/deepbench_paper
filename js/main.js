@@ -1010,11 +1010,27 @@ async function populateHeaderBgGrid() {
         // (we won't check existence here — broken images will simply show as broken but won't affect count)
     }
 
+    function shuffleArray(input) {
+        const arr = input.slice();
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    const signature = files.join('|');
+    if (!window.__headerGridFiles || window.__headerGridFilesSignature !== signature) {
+        window.__headerGridFiles = shuffleArray(files);
+        window.__headerGridFilesSignature = signature;
+    }
+    const shuffledFiles = window.__headerGridFiles;
+
     // Prepare fragment and ensure exactly totalTiles elements
     grid.innerHTML = '';
     const fragment = document.createDocumentFragment();
     for (let i = 0; i < totalTiles; i++) {
-        const src = files[i % files.length]; // cycle through candidates to fill the grid
+        const src = shuffledFiles[i % shuffledFiles.length]; // cycle through candidates to fill the grid
         const img = document.createElement('img');
         img.src = src;
         img.alt = '';
