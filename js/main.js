@@ -486,10 +486,61 @@
         return thumbnail;
     }
 
+    // --- RQ1 MODEL SELECTOR ---
+    const rq1Models = [
+        { id: 'gpt-4o',              label: 'GPT-4o' },
+        { id: 'gpt-4o-mini',         label: 'GPT-4o-mini' },
+        { id: 'gpt-oss_120b',        label: 'GPT-OSS 120B' },
+        { id: 'qwen_110b',           label: 'Qwen 110B' },
+        { id: 'llama3.3_70b',        label: 'Llama-3.3 70B' },
+        { id: 'deepseek-r1_70b',     label: 'DeepSeek-R1 70B' },
+        { id: 'gemma3_27b',          label: 'Gemma-3 27B' },
+        { id: 'llama_4_scout_17b',   label: 'Llama-4 Scout 17B' },
+        { id: 'phi4_14b',            label: 'Phi-4 14B' },
+        { id: 'qwen3_8b',            label: 'Qwen 8B' },
+        { id: 'mistral_latest',      label: 'Mistral 8x7B' },
+    ];
+
+    function buildRQ1ModelSelector() {
+        const container = document.getElementById('rq1-model-thumbnails');
+        const heatmap = document.getElementById('rq1-heatmap');
+        const title = document.getElementById('rq1-plot-title');
+        if (!container || !heatmap) return;
+
+        let selectedModel = rq1Models[0].id;
+
+        function update() {
+            const model = rq1Models.find(m => m.id === selectedModel);
+            const path = `assets/experiments/augmentation_selection/${selectedModel}/augmentation_selection_${selectedModel}_heatmap_flipped.png`;
+            heatmap.src = path;
+            heatmap.alt = `Heatmap of ${model.label} corruption selection frequencies`;
+            if (title) title.textContent = `Corruption Selection Frequencies (${model.label})`;
+            container.querySelectorAll('.rq1-model-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.model === selectedModel);
+            });
+        }
+
+        rq1Models.forEach(model => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'rq1-model-btn';
+            btn.dataset.model = model.id;
+            btn.textContent = model.label;
+            btn.addEventListener('click', () => {
+                selectedModel = model.id;
+                update();
+            });
+            container.appendChild(btn);
+        });
+
+        update();
+    }
+
     // --- INITIALIZATION ---
     function initialize() {
         buildCorruptionGallery();
         buildUseCasesSection();
+        buildRQ1ModelSelector();
         document.querySelectorAll('.experiment').forEach(expDiv => {
             const expKey = expDiv.dataset.exp;
             const basePath = `assets/experiments/${expKey}`;
