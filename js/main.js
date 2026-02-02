@@ -749,8 +749,8 @@ function formatPages(pages) {
   return pages.replace(/--/g, '–');
 }
 
-// Build a plain-text, paper-style reference string without links
-function formatBibEntry(entry) {
+// Build structured HTML for a reference entry
+function formatBibEntryHTML(entry) {
   const f = entry.fields;
   const authors = formatAuthors(f.author);
   const title = f.title ? f.title.replace(/[{}]/g, '') : '';
@@ -762,49 +762,48 @@ function formatBibEntry(entry) {
   const booktitle = f.booktitle || '';
   const journal = f.journal || '';
   const organization = f.organization || '';
+  const note = f.note || '';
 
-  let parts = [];
-  if (authors) parts.push(authors + '.');
-  if (title) parts.push(title + '.');
-
+  let venue = '';
   switch (entry.type) {
     case 'article':
       if (journal) {
-        let j = journal;
+        let jp = [journal];
         let volIssue = volume ? (number ? `${volume}${number}` : volume) : '';
-        let jp = [];
-        jp.push(j);
         if (volIssue) jp.push(volIssue);
         if (pages) jp.push(pages);
-        parts.push(jp.join(', ') + '.');
+        venue = jp.join(', ');
       }
-      if (year) parts.push(year + '.');
       break;
     case 'inproceedings':
       if (booktitle) {
-        let conf = `In: ${booktitle}`;
         let extras = [];
         if (pages) extras.push(pages);
         if (organization) extras.push(organization);
-        if (extras.length) conf += `, ${extras.join(', ')}`;
-        parts.push(conf + '.');
+        venue = `In: ${booktitle}`;
+        if (extras.length) venue += `, ${extras.join(', ')}`;
       }
-      if (year) parts.push(year + '.');
       break;
-    case 'book':
-      const pubBits = [];
-      if (publisher) pubBits.push(publisher);
-      if (year) pubBits.push(year);
-      if (pubBits.length) parts.push(pubBits.join(', ') + '.');
+    case 'book': {
+      const bits = [];
+      if (publisher) bits.push(publisher);
+      if (bits.length) venue = bits.join(', ');
       break;
-    default:
-      // Fallback: include journal or booktitle or publisher if available
+    }
+    default: {
       const where = journal || booktitle || publisher || organization;
-      if (where) parts.push(where + '.');
-      if (year) parts.push(year + '.');
+      if (where) venue = where;
+    }
   }
 
-  return parts.join(' ').replace(/\s+/g, ' ').trim();
+  const parts = [];
+  if (authors) parts.push(`<span class="ref-authors">${authors}</span>`);
+  if (title) parts.push(`<span class="ref-title">${title}</span>`);
+  if (venue) parts.push(`<span class="ref-venue">${venue}</span>`);
+  if (year) parts.push(`<span class="ref-year">${year}</span>`);
+  if (note) parts.push(`<span class="ref-note">${note}</span>`);
+
+  return parts.join(' ');
 }
 
 // 1. Load BibTeX file
@@ -834,7 +833,7 @@ async function renderSources() {
   // Build all <li> first
   const items = entries.map(entry => {
     const li = document.createElement('li');
-    li.textContent = formatBibEntry(entry);
+    li.innerHTML = formatBibEntryHTML(entry);
     return li;
   });
 

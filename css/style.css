@@ -230,6 +230,74 @@ h2 {
 #sources-list {
   line-height: 1.6;
 }
+.references-list {
+  list-style: none;
+  counter-reset: ref-counter;
+  padding-left: 0;
+  margin: 0;
+}
+.references-list li {
+  counter-increment: ref-counter;
+  position: relative;
+  padding: 0.65rem 0.75rem 0.65rem 2.5rem;
+  margin-bottom: 0.35rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  background: var(--bg-color);
+  transition: background-color 0.15s ease;
+}
+.references-list li:hover {
+  background: #edf0f3;
+}
+.references-list li::before {
+  content: "[" counter(ref-counter) "]";
+  position: absolute;
+  left: 0.5rem;
+  top: 0.65rem;
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 0.8rem;
+  min-width: 1.75rem;
+  text-align: right;
+}
+.ref-authors {
+  color: var(--text-color);
+  font-weight: 600;
+}
+.ref-authors::after {
+  content: ". ";
+}
+.ref-title {
+  color: var(--text-color);
+}
+.ref-title::after {
+  content: ". ";
+}
+.ref-venue {
+  color: #495057;
+  font-style: italic;
+}
+.ref-venue::after {
+  content: ". ";
+}
+.ref-year {
+  color: #6c757d;
+}
+.ref-year::after {
+  content: ".";
+}
+.ref-note {
+  display: inline-block;
+  background: #fff3cd;
+  color: #856404;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+  margin-left: 0.35rem;
+  vertical-align: middle;
+}
 #citation .code-block {
   position: relative;
   background: #f6f8fa; /* light background */
