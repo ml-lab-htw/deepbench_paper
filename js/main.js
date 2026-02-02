@@ -17,7 +17,7 @@
     ];
 
     const datasetSources = {
-        'MedicalDiagnosis': '<strong>Medical:</strong> Eight datasets across radiography and ultrasound provide domain labels for medical imaging [Wang, 2017; Halabi, 2019; Sarhan, 2024; Ali, 2016; Baby, 2017; Al, 2020; Joo, 2013; Lee, 2017].',
+        'MedicalDiagnosis': '<strong>Medical:</strong> Eight datasets across radiography and ultrasound provide domain labels for medical imaging [Wang, 2017; Halabi, 2019; Sarhan, 2024; Ali, 2016; Baby, 2017; Al, 2020; Joo, 2023; Lee, 2017].',
         'AutonomousDriving': '<strong>Driving:</strong> KITTI offers diverse traffic scenes from onboard sensors; objects are cropped and relabeled into car, person, tram, and truck [Geiger, 2012].',
         'ManufacturingQuality': '<strong>Manufacturing:</strong> MVTec AD is repurposed as a 15-class object dataset over industrial items [Bergmann, 2019].',
         'PeopleRecognition': '<strong>People:</strong> FER13 contains 35k grayscale faces across seven emotions under varied conditions [Goodfellow, 2013].',
@@ -491,13 +491,13 @@
         { id: 'gpt-4o',              label: 'GPT-4o' },
         { id: 'gpt-4o-mini',         label: 'GPT-4o-mini' },
         { id: 'gpt-oss_120b',        label: 'GPT-OSS 120B' },
-        { id: 'qwen_110b',           label: 'Qwen 110B' },
+        { id: 'qwen_110b',           label: 'Qwen2.5 110B' },
         { id: 'llama3.3_70b',        label: 'Llama-3.3 70B' },
         { id: 'deepseek-r1_70b',     label: 'DeepSeek-R1 70B' },
         { id: 'gemma3_27b',          label: 'Gemma-3 27B' },
         { id: 'llama_4_scout_17b',   label: 'Llama-4 Scout 17B' },
         { id: 'phi4_14b',            label: 'Phi-4 14B' },
-        { id: 'qwen3_8b',            label: 'Qwen 8B' },
+        { id: 'qwen3_8b',            label: 'Qwen2.5 8B' },
         { id: 'mistral_latest',      label: 'Mistral 8x7B' },
     ];
 
