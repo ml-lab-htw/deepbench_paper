@@ -1,16 +1,16 @@
 :root {
     --bg-color: #f8f9fa;
-    --text-color: #212529;
-    --primary-color: #007bff;
-    --primary-color-rgb: 0, 123, 255; /* RGB triplet for use with rgba(var(--primary-color-rgb), a) */
-    --primary-light: rgba(0, 123, 255, 0.08);
+    --text-color: #682BFF;
+    --primary-color: #8E1BE8;
+    --primary-color-rgb: var(--accent-green); /* RGB triplet for use with rgba(var(--primary-color-rgb), a) */
+    --primary-light: rgba(var(#1E55FF), 0.88);
     --header-bg: #ffffff;
     --card-bg: #ffffff;
     --border-color: #dee2e6;
     --shadow-color: rgba(0, 0, 0, 0.05);
-    --accent-green: #198754;
-    --accent-orange: #e67700;
-    --accent-purple: #6f42c1;
+    --accent-green: #1E55FF;
+    --accent-orange: #D91EFF;
+    --accent-purple: #8E1BE8;
     --header-offset: 80px; /* default header offset for scroll-margin calculations */
     --header-tile-size: 45px; /* increased tile size for larger header images */
     --header-tile-gap: 10px;
@@ -150,7 +150,7 @@ h3 {
 
 .thumbnail.active {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    box-shadow: 0 0 0 3px rgba(var(--accent-green), 0.25);
 }
 
 .thumbnail-container {
@@ -509,7 +509,7 @@ h3 {
 
 #references-toggle:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    box-shadow: 0 0 0 3px rgba(var(--accent-green), 0.25);
 }
 
 @media (max-width: 520px) {
@@ -749,7 +749,7 @@ body.coming-soon-active #coming-soon-overlay .coming-soon-content {
 
 .rq1-model-btn:hover {
     background: var(--primary-light);
-    border-color: rgba(0, 123, 255, 0.3);
+    border-color: rgba(var(--accent-green), 0.3);
     color: var(--primary-color);
 }
 
@@ -757,7 +757,7 @@ body.coming-soon-active #coming-soon-overlay .coming-soon-content {
     background: var(--primary-color);
     border-color: var(--primary-color);
     color: #ffffff;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    box-shadow: 0 0 0 3px rgba(var(--accent-green), 0.25);
 }
 
 /* Header background image grid and overlay */
@@ -823,7 +823,7 @@ body.coming-soon-active #coming-soon-overlay .coming-soon-content {
 
 .header-content .site-nav a:hover {
     background: var(--primary-light);
-    border-color: rgba(0, 123, 255, 0.3);
+    border-color: rgba(var(--accent-green), 0.3);
     color: var(--primary-color);
 }
 
@@ -844,4 +844,35 @@ body.coming-soon-active #coming-soon-overlay .coming-soon-content {
     .header-bg-grid img {
         border-radius: 3px;
     }
+}
+
+
+.copy-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #ffffff;
+    color: var(--primary-color);
+    border: 1px solid var(--border-color);
+    border-radius: 9999px;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.08s ease;
+}
+
+.copy-button:hover {
+    background: var(--primary-light);
+    border-color: rgba(var(--accent-green), 0.3);
+}
+
+.copy-button:active {
+    transform: translateY(1px);
+}
+
+.copy-button.copied {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #ffffff;
 }
