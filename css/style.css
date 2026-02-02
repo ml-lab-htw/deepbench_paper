@@ -35,6 +35,7 @@ header {
   z-index: 1100; /* above sticky thumbnails */
   transition: padding 200ms ease;
   overflow: visible; /* allow background grid overflow */
+  /*text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;*/
 }
 
 header.scrolled {
@@ -47,6 +48,7 @@ header h1 {
   font-size: clamp(1.1rem, 5.5vw, 2.2rem);
   line-height: 1.05;
   transition: font-size 200ms ease, transform 200ms ease;
+  text-shadow: -1px -1px 0 #f00, 1px -1px 0 #0f0, -1px 1px 0 #00f, 1px 1px 0 #0ff;
 }
 
 header.scrolled h1 {
@@ -118,6 +120,7 @@ h2 {
   margin-bottom: 1.5rem;
   font-size: 1.35rem;
   letter-spacing: -0.01em;
+  /*text-shadow: -1px -1px 0 #f00, 1px -1px 0 #0f0, -1px 1px 0 #00f, 1px 1px 0 #0ff;*/
 }
 
 h3 {
@@ -762,7 +765,7 @@ body.coming-soon-active #coming-soon-overlay .coming-soon-content {
   inset: 0 0 auto 0; /* cover header top area */
   height: 100%;
   width: 100%;
-  background: rgba(255, 255, 255, 0.75); /* use primary color as semi-transparent overlay */
+  background: rgba(255, 255, 255, 0.7); /* use primary color as semi-transparent overlay */
   z-index: 1; /* between grid and content */
   pointer-events: none;
 }
