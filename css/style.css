@@ -82,10 +82,11 @@ header .site-nav {
 
 header .site-nav a {
     /* non-hover: use the main text color for dark text */
-    color: var(--text-color);
-    background: transparent;
     border-color: transparent;
     transition: background 180ms ease, box-shadow 220ms ease, color 140ms ease;
+    background: #ffffff;
+    color: #495057;
+    border: 1px solid var(--border-color);
 }
 
 header .site-nav a:hover {
@@ -452,35 +453,7 @@ h3 {
     line-height: 1.55;
 }
 
-.copy-button {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: #ffffff;
-    color: var(--primary-color);
-    border: 1px solid var(--border-color);
-    border-radius: 9999px;
-    padding: 0.35rem 0.85rem;
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.08s ease;
-}
 
-.copy-button:hover {
-    background: var(--primary-light);
-    border-color: rgba(0, 123, 255, 0.3);
-}
-
-.copy-button:active {
-    transform: translateY(1px);
-}
-
-.copy-button.copied {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
-    color: #ffffff;
-}
 
 /* Modernize Sources expand/collapse control */
 #sources .references-controls {
@@ -761,32 +734,30 @@ body.coming-soon-active #coming-soon-overlay .coming-soon-content {
 .rq1-model-btn {
     appearance: none;
     -webkit-appearance: none;
-    background: linear-gradient(#fff, #fff) padding-box,
-                linear-gradient(to right, #f00, #0f0, #00f, #ff0) border-box;
-    color: var(--text-color);
-    border: 2px solid transparent;
+    background: #ffffff;
+    color: #495057;
+    border: 1px solid var(--border-color);
     border-radius: 9999px;
     padding: 0.35rem 0.75rem;
     font-family: inherit;
     font-size: 0.8rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
     white-space: nowrap;
 }
 
 .rq1-model-btn:hover {
-    background: linear-gradient(to right, #f00, #0f0, #00f, #ff0);
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transform: translateY(-1px);
+    background: var(--primary-light);
+    border-color: rgba(0, 123, 255, 0.3);
+    color: var(--primary-color);
 }
 
 .rq1-model-btn.active {
-    background: linear-gradient(to right, #f00, #0f0, #00f, #ff0);
-    border-color: transparent;
+    background: var(--primary-color);
+    border-color: var(--primary-color);
     color: #ffffff;
-    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 }
 
 /* Header background image grid and overlay */
@@ -838,25 +809,22 @@ body.coming-soon-active #coming-soon-overlay .coming-soon-content {
 /* Make nav links use lighter color on header to ensure contrast */
 .header-content .site-nav a {
     /* non-hover: use the main text color for dark text */
-    color: var(--text-color);
-    background: rgba(255, 255, 255, 0.0);
-    border-color: rgba(var(--primary-color), 0.99);
-    cursor: pointer;
-    transition: background 180ms ease, box-shadow 220ms ease, color 140ms ease;
-    padding: 0.5rem 0.85rem;
-    border-radius: 99px;
-    border-width: 0px;
+    color: #495057;
+    border: 1px solid var(--border-color);
+    border-radius: 9999px;
+    padding: 0.35rem 0.75rem;
+    font-family: inherit;
+    font-size: 0.8rem;
     font-weight: 600;
-    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    white-space: nowrap;
 }
 
 .header-content .site-nav a:hover {
-    color: #ffffff;
-    /* Darken the main color by overlaying a stronger translucent black tint */
-    background: linear-gradient(rgba(0, 0, 0, 0.36), rgba(0, 0, 0, 0.36)), var(--primary-color);
-    border-color: var(--primary-color);
-    box-shadow: 0 8px 28px rgba(var(--primary-color-rgb), 0.24);
-    transition: background 180ms ease, box-shadow 220ms ease, color 140ms ease;
+    background: var(--primary-light);
+    border-color: rgba(0, 123, 255, 0.3);
+    color: var(--primary-color);
 }
 
 .header-content .authors,
