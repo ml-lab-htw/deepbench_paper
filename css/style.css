@@ -391,6 +391,7 @@ h3 {
 
 .ref-title {
     color: var(--text-color);
+    /*font-weight: 600;*/
 }
 
 .ref-title::after {
@@ -637,7 +638,7 @@ h3 {
 }
 
 #highlights .highlights-list li::before {
-    content: "\f00c"; /* Font Awesome check */
+    content: "\f00c";
     font-family: "Font Awesome 5 Free", "Font Awesome 6 Free", sans-serif;
     font-weight: 900;
     position: absolute;
@@ -649,15 +650,15 @@ h3 {
 
 header .authors {
     margin: 0.5rem 0 0.15rem 0;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     font-weight: 600;
-    color: #343a40;
+    color: #6c757d;
 }
 
 header .affiliations {
     margin: 0;
-    color: #6c757d;
     font-size: 0.85rem;
+    color: #6c757d;
 }
 
 /* Coming Soon overlay */
@@ -829,7 +830,7 @@ body.coming-soon-active #coming-soon-overlay .coming-soon-content {
 
 .header-content .authors,
 .header-content .affiliations {
-    color: var(--text-color); /* auxiliary header text should also use site text color */
+    color: #6c757d; /* auxiliary header text in gray */
 }
 
 /* Reduce header grid density on small screens */
