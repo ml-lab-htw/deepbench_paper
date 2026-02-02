@@ -835,15 +835,37 @@ body.coming-soon-active #coming-soon-overlay .coming-soon-content {
 
 /* Reduce header grid density on small screens */
 @media (max-width: 520px) {
+    :root {
+        --header-tile-size: 32px;
+        --header-tile-gap: 6px;
+    }
+
     .header-bg-grid {
-        grid-template-columns: repeat(auto-fill, 22px);
-        grid-auto-rows: 22px;
-        gap: 5px;
+        grid-template-rows: repeat(3, var(--header-tile-size));
+        gap: var(--header-tile-gap);
         padding: 8px 10px;
     }
 
     .header-bg-grid img {
         border-radius: 3px;
+    }
+}
+
+@media (min-width: 521px) and (max-width: 768px) {
+    :root {
+        --header-tile-size: 38px;
+        --header-tile-gap: 8px;
+    }
+
+    .header-bg-grid {
+        grid-template-rows: repeat(3, var(--header-tile-size));
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    :root {
+        --header-tile-size: 42px;
+        --header-tile-gap: 9px;
     }
 }
 
