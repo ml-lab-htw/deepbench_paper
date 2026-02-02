@@ -761,30 +761,32 @@ body.coming-soon-active #coming-soon-overlay .coming-soon-content {
 .rq1-model-btn {
     appearance: none;
     -webkit-appearance: none;
-    background: #ffffff;
-    color: #495057;
-    border: 1px solid var(--border-color);
+    background: linear-gradient(#fff, #fff) padding-box,
+                linear-gradient(to right, #f00, #0f0, #00f, #ff0) border-box;
+    color: var(--text-color);
+    border: 2px solid transparent;
     border-radius: 9999px;
     padding: 0.35rem 0.75rem;
     font-family: inherit;
     font-size: 0.8rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
     white-space: nowrap;
 }
 
 .rq1-model-btn:hover {
-    background: var(--primary-light);
-    border-color: rgba(0, 123, 255, 0.3);
-    color: var(--primary-color);
+    background: linear-gradient(to right, #f00, #0f0, #00f, #ff0);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
 }
 
 .rq1-model-btn.active {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
+    background: linear-gradient(to right, #f00, #0f0, #00f, #ff0);
+    border-color: transparent;
     color: #ffffff;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
 }
 
 /* Header background image grid and overlay */
@@ -822,7 +824,7 @@ body.coming-soon-active #coming-soon-overlay .coming-soon-content {
     inset: 0 0 auto 0; /* cover header top area */
     height: 100%;
     width: 100%;
-    background: rgba(255, 255, 255, 0.7); /* use primary color as semi-transparent overlay */
+    background: rgba(255, 255, 255, 0.9); /* use primary color as semi-transparent overlay */
     z-index: 1; /* between grid and content */
     pointer-events: none;
 }
