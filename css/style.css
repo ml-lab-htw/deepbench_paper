@@ -442,12 +442,13 @@ body.coming-soon-active #coming-soon-overlay .coming-soon-content {
   display: none !important;
 }
 
-/* Sticky thumbnail bar when scrolling through experiments */
-.thumbnail-container.is-stuck {
-  position: fixed;
-  z-index: 1050;
-  background: var(--header-bg);
-  box-shadow: 0 2px 6px var(--shadow-color);
-  padding: 0.5rem 1rem;
-  border-radius: 0 0 8px 8px;
+/* Per-experiment local corruption thumbnail bar */
+.corruption-bar-local {
+  gap: 0.5rem;
+  margin: 0.75rem 0 0.25rem 0;
+}
+
+.corruption-thumb-small {
+  width: 40px;
+  height: 40px;
 }

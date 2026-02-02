@@ -72,6 +72,15 @@
         return imagesManifest;
     }
 
+    const corruptionsPerUseCase = {
+        'AutonomousDriving': ['Brightness','Contrast','ImageFlip','GaussianNoise','GlobalColourShift','ImageRotation','MotionBlur','PerspectiveTransformation','Rain','Shadow'],
+        'Handheld': ['Brightness','Contrast','ImageFlip','GaussianNoise','GlobalColourShift','GridElasticDeformation','ImageRotation','MotionBlur','PerspectiveTransformation','Shadow'],
+        'ManufacturingQuality': ['Brightness','Contrast','ImageFlip','GaussianBlur','GaussianNoise','GridDistortion','GridElasticDeformation','ImageRotation','MotionBlur','PerspectiveTransformation','SaltPepperNoise','Shadow'],
+        'MedicalDiagnosis': ['Brightness','Contrast','ImageFlip','GaussianBlur','GaussianNoise','GridElasticDeformation','ImageRotation','MotionBlur','PerspectiveTransformation','SaltPepperNoise'],
+        'PeopleRecognition': ['Brightness','Contrast','ImageFlip','GaussianNoise','GridElasticDeformation','ImageRotation','MotionBlur','PerspectiveTransformation','SaltPepperNoise','Shadow'],
+        'SatelliteImaging': ['Brightness','CloudGenerator','Contrast','ImageFlip','GaussianNoise','ImageRotation','MotionBlur','PerspectiveTransformation','Shadow']
+    };
+
     const plotCorruptionNameMap = {
         'ImageFlip': 'Flip'
     };
@@ -191,16 +200,11 @@
 
     function buildCorruptionGallery() {
         topThumbnailContainer.innerHTML = '';
-        // Build sequentially; createThumbnail is async to read manifest safely
         (async () => {
             for (const corr of corruptions) {
                 const thumb = await createThumbnail(corr, () => {
                     currentCorruption = corr;
                     updateLargeImageView();
-                    document.querySelectorAll('.experiment').forEach(expDiv => {
-                        const ev = new Event('corruptionChanged');
-                        expDiv.dispatchEvent(ev);
-                    });
                 });
                 topThumbnailContainer.appendChild(thumb);
             }
@@ -217,16 +221,10 @@
          thumbContainer.classList.add('thumbnail-container');
          container.appendChild(thumbContainer);
 
-         // Options (filter toggle)
+         // Options (context label only)
          const plotOptions = document.createElement('div');
          plotOptions.className = 'plot-options';
-         // For correlation experiment, there is no per-corruption toggle
-         plotOptions.innerHTML = (expKey === 'correlation')
-             ? `<span id="${expKey}-plot-context-label" class="plot-context-label"></span>`
-             : `
-             <label><input type="checkbox" id="${expKey}-filter-by-corruption"> Show only selected corruption</label>
-             <span id="${expKey}-plot-context-label" class="plot-context-label"></span>
-         `;
+         plotOptions.innerHTML = `<span id="${expKey}-plot-context-label" class="plot-context-label"></span>`;
          container.appendChild(plotOptions);
 
          // Plots
@@ -254,6 +252,14 @@
          }
          container.appendChild(plots);
 
+         // Local corruption thumbnail bar (skip for correlation)
+         if (expKey !== 'correlation') {
+             const corrBar = document.createElement('div');
+             corrBar.id = `${expKey}-corruption-bar`;
+             corrBar.classList.add('thumbnail-container', 'corruption-bar-local');
+             container.appendChild(corrBar);
+         }
+
          initializeSharedExperimentLogic(expKey, basePath);
      }
 
@@ -262,10 +268,10 @@
          const accImg = document.getElementById(`${expKey}-acc-plot`);
          const flipImg = document.getElementById(`${expKey}-flip-plot`);
          const corrImg = document.getElementById(`${expKey}-corr-plot`);
-         const filterToggle = document.getElementById(`${expKey}-filter-by-corruption`);
          const plotContextLabelLocal = document.getElementById(`${expKey}-plot-context-label`);
          const plotsContainerLocal = document.getElementById(`${expKey}-plots-container`);
          const secondPlotTitleEl = document.getElementById(`${expKey}-second-plot-title`);
+         const corruptionBar = document.getElementById(`${expKey}-corruption-bar`);
 
          // Determine which use cases to show for this experiment
          const ucList = (expKey === 'specialists')
@@ -273,31 +279,18 @@
            : useCases;
 
          let currentUC = ucList[0];
+         let selectedCorruption = null; // null = combined view
 
          // build thumbnails for use cases
          ucList.forEach(uc => {
              const thumb = createUseCaseThumbnail(uc, () => {
                  currentUC = uc;
+                 selectedCorruption = null;
+                 updateCorruptionThumbnails();
                  updatePlots();
              });
              thumbs.appendChild(thumb);
          });
-
-         // Restore persisted toggle if any (non-correlation only)
-         if (filterToggle) {
-             const saved = localStorage.getItem(`${expKey}_filterByCorruption`);
-             if (saved === '1' || saved === '0') filterToggle.checked = saved === '1';
-             filterToggle.addEventListener('change', () => {
-                 localStorage.setItem(`${expKey}_filterByCorruption`, filterToggle.checked ? '1' : '0');
-                 updatePlots();
-             });
-         }
-
-         // react when global corruption changes (listen only on own experiment div)
-         const ownExpDiv = document.querySelector(`.experiment[data-exp="${expKey}"]`);
-         if (ownExpDiv) {
-             ownExpDiv.addEventListener('corruptionChanged', () => { updatePlots(); });
-         }
 
          function updateUseCaseSelection() {
              thumbs.querySelectorAll('.thumbnail').forEach(t => {
@@ -305,12 +298,39 @@
              });
          }
 
+         function updateCorruptionThumbnails() {
+             if (!corruptionBar) return;
+             corruptionBar.innerHTML = '';
+             const availableCorruptions = corruptionsPerUseCase[currentUC] || [];
+             (async () => {
+                 for (const corr of availableCorruptions) {
+                     const thumb = await createThumbnail(corr, () => {
+                         if (selectedCorruption === corr) {
+                             selectedCorruption = null;
+                         } else {
+                             selectedCorruption = corr;
+                         }
+                         updateCorruptionSelection();
+                         updatePlots();
+                     });
+                     thumb.classList.add('corruption-thumb-small');
+                     corruptionBar.appendChild(thumb);
+                 }
+                 updateCorruptionSelection();
+             })();
+         }
+
+         function updateCorruptionSelection() {
+             if (!corruptionBar) return;
+             corruptionBar.querySelectorAll('.thumbnail').forEach(t => {
+                 t.classList.toggle('active', t.dataset.corruption === selectedCorruption);
+             });
+         }
+
          function updatePlots() {
-             const corr = currentCorruption;
-             const corrForFile = plotCorruptionNameMap[corr] || corr;
+             updateUseCaseSelection();
 
              if (expKey === 'correlation') {
-                 // Correlation plot lives under main experiment assets path
                  const corrPath = `assets/experiments/main/correlation_${currentUC}.png`;
                  if (corrImg) {
                      corrImg.onerror = null;
@@ -321,23 +341,26 @@
                  return;
              }
 
+             const corr = selectedCorruption;
+             const corrForFile = corr ? (plotCorruptionNameMap[corr] || corr) : null;
+
              // Configure second plot depending on experiment
              const secondPrefix = (expKey === 'pretraining') ? 'mce' : 'flip';
              const secondTitle = (expKey === 'pretraining') ? 'Mean Corruption Error (MCE)' : 'Label Flip Probability';
              if (secondPlotTitleEl) secondPlotTitleEl.textContent = secondTitle;
 
              const combinedAcc = `${basePath}/acc_${currentUC}.png`;
-             const perCorrAcc = `${basePath}/acc_${currentUC}_${corrForFile}.png`;
+             const perCorrAcc = corrForFile ? `${basePath}/acc_${currentUC}_${corrForFile}.png` : null;
 
              const combinedSecond = `${basePath}/${secondPrefix}_${currentUC}.png`;
-             const perCorrSecond = `${basePath}/${secondPrefix}_${currentUC}_${corrForFile}.png`;
+             const perCorrSecond = corrForFile ? `${basePath}/${secondPrefix}_${currentUC}_${corrForFile}.png` : null;
 
              // Optional alternate prefix fallback (e.g., use flip when mce missing)
              const altSecondPrefix = (secondPrefix === 'mce') ? 'flip' : null;
              const combinedSecondAlt = altSecondPrefix ? `${basePath}/${altSecondPrefix}_${currentUC}.png` : null;
-             const perCorrSecondAlt = altSecondPrefix ? `${basePath}/${altSecondPrefix}_${currentUC}_${corrForFile}.png` : null;
+             const perCorrSecondAlt = (altSecondPrefix && corrForFile) ? `${basePath}/${altSecondPrefix}_${currentUC}_${corrForFile}.png` : null;
 
-             const showPerCorruption = !!(filterToggle && filterToggle.checked);
+             const showPerCorruption = selectedCorruption !== null;
              let anyFallbackUsed = false;
 
              // Toggle side-by-side layout when showing per-corruption
@@ -413,7 +436,6 @@
                  accImg.alt = `Balanced accuracy for ${humanizeCamelCase(currentUC)} (combined)`;
 
                  if (expKey === 'pretraining') {
-                     // Try combined MCE then combined flip as fallback
                      const sources = [combinedSecond];
                      const alts = [`${secondTitle} for ${humanizeCamelCase(currentUC)} (combined)`];
                      if (combinedSecondAlt) {
@@ -435,9 +457,9 @@
              if (!plotContextLabelLocal) return;
              if (showPerCorruption) {
                  if (usedFallback) {
-                     plotContextLabelLocal.textContent = `Per-corruption plot not available for ${humanizeCamelCase(currentCorruption)} in ${humanizeCamelCase(currentUC)} — showing combined.`;
+                     plotContextLabelLocal.textContent = `Per-corruption plot not available for ${humanizeCamelCase(selectedCorruption)} in ${humanizeCamelCase(currentUC)} — showing combined.`;
                  } else {
-                     plotContextLabelLocal.textContent = `Showing: ${humanizeCamelCase(currentUC)} — ${humanizeCamelCase(currentCorruption)}`;
+                     plotContextLabelLocal.textContent = `Showing: ${humanizeCamelCase(currentUC)} — ${humanizeCamelCase(selectedCorruption)}`;
                  }
              } else {
                  plotContextLabelLocal.textContent = '';
@@ -446,6 +468,7 @@
 
          // initial
          updateUseCaseSelection();
+         updateCorruptionThumbnails();
          updatePlots();
      }
 
@@ -473,8 +496,8 @@
             createExperimentSection({ expKey, container: expDiv, basePath });
         });
 
-        // Activate sticky thumbnails spanning all experiments
-        setupStickyThumbnailsAcrossExperiments();
+        // Header shrink on scroll
+        setupHeaderScrollBehavior();
 
         // Toggle Coming Soon via URL or global flag
         setupComingSoonAutoToggle();
@@ -868,85 +891,18 @@ document.addEventListener('DOMContentLoaded', () => {
     renderSources();
     initialize();
 });
-function setupStickyThumbnailsAcrossExperiments() {
-        const startEl = document.getElementById('corruptions-gallery');
-        const endEl = document.getElementById('experiments-correlation');
-        const bar = topThumbnailContainer;
-        const mainEl = document.querySelector('main');
+function setupHeaderScrollBehavior() {
         const headerEl = document.querySelector('header');
-        if (!startEl || !endEl || !bar || !mainEl) return;
-
-        let spacer = null;
-        function addSpacer() {
-            if (!spacer) {
-                spacer = document.createElement('div');
-                spacer.style.width = '100%';
-                bar.parentNode.insertBefore(spacer, bar);
-            }
-            spacer.style.height = `${bar.offsetHeight}px`;
-        }
-        function removeSpacer() {
-            if (spacer && spacer.parentNode) spacer.parentNode.removeChild(spacer);
-            spacer = null;
-        }
-        function updateBarWidthPosition() {
-            const mainRect = mainEl.getBoundingClientRect();
-            bar.style.width = `${mainRect.width}px`;
-            bar.style.left = `${mainRect.left}px`;
-            bar.style.transform = 'none';
-            // Offset below header height
-            const h = headerEl ? headerEl.getBoundingClientRect().height : 0;
-            bar.style.top = `${Math.max(0, h)}px`;
-        }
-        function updateScrollOffsetsVars(isStuck) {
-            const h = headerEl ? headerEl.getBoundingClientRect().height : 0;
-            document.documentElement.style.setProperty('--header-offset', `${Math.round(h)}px`);
-            const tb = isStuck ? bar.offsetHeight : 0;
-            document.documentElement.style.setProperty('--thumbbar-offset', `${Math.round(tb)}px`);
-        }
+        if (!headerEl) return;
 
         function onScroll() {
-            // Toggle header shrink state
-            if (headerEl) {
-                if (window.scrollY > 20) headerEl.classList.add('scrolled');
-                else headerEl.classList.remove('scrolled');
-            }
-            const startRect = startEl.getBoundingClientRect();
-            const endRect = endEl.getBoundingClientRect();
-            const shouldStick = startRect.top <= 0 && endRect.bottom > 0;
-            if (shouldStick) {
-                if (!bar.classList.contains('is-stuck')) {
-                    addSpacer();
-                    bar.classList.add('is-stuck');
-                    bar.style.position = 'fixed';
-                    updateBarWidthPosition();
-                } else {
-                    // keep spacer height updated if images/layout changed
-                    if (spacer) spacer.style.height = `${bar.offsetHeight}px`;
-                    updateBarWidthPosition();
-                }
-            } else {
-                if (bar.classList.contains('is-stuck')) {
-                    bar.classList.remove('is-stuck');
-                    bar.style.position = '';
-                    bar.style.width = '';
-                    bar.style.left = '';
-                    bar.style.transform = '';
-                    bar.style.top = '';
-                    removeSpacer();
-                }
-            }
-            updateScrollOffsetsVars(bar.classList.contains('is-stuck'));
+            if (window.scrollY > 20) headerEl.classList.add('scrolled');
+            else headerEl.classList.remove('scrolled');
+            const h = headerEl.getBoundingClientRect().height;
+            document.documentElement.style.setProperty('--header-offset', `${Math.round(h)}px`);
         }
-        const onResize = () => {
-            if (bar.classList.contains('is-stuck')) updateBarWidthPosition();
-            updateScrollOffsetsVars(bar.classList.contains('is-stuck'));
-            onScroll();
-        };
 
         window.addEventListener('scroll', onScroll, { passive: true });
-        window.addEventListener('resize', onResize);
-        // initial
+        window.addEventListener('resize', () => onScroll());
         onScroll();
-        updateScrollOffsetsVars(false);
     }
