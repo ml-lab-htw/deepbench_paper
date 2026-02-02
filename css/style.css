@@ -45,7 +45,7 @@ header.scrolled h1 {
   font-size: clamp(0.9rem, 4.25vw, 2.0rem); /* responsive small title */
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: clip;
+  text-overflow: ellipsis;
 }
 
 header.scrolled h1 br {
@@ -58,7 +58,7 @@ header.scrolled .affiliations {
 }
 
 .small-of {
-  font-size: 1.7rem; /* slightly smaller than surrounding title text */
+  font-size: clamp(0.85rem, 4.5vw, 1.7rem); /* scales with title, always smaller */
 }
 
 header .site-nav {
@@ -228,9 +228,7 @@ h2 {
   margin-bottom: 0.5em;
 }
 #sources-list {
-  font-family: monospace;
-  white-space: pre-wrap;
-  line-height: 1.4;
+  line-height: 1.6;
 }
 #citation .code-block {
   position: relative;
@@ -444,4 +442,12 @@ body.coming-soon-active #coming-soon-overlay .coming-soon-content {
   display: none !important;
 }
 
-/* Thumbnails keep a constant size even when sticky for smoother UX */
+/* Sticky thumbnail bar when scrolling through experiments */
+.thumbnail-container.is-stuck {
+  position: fixed;
+  z-index: 1050;
+  background: var(--header-bg);
+  box-shadow: 0 2px 6px var(--shadow-color);
+  padding: 0.5rem 1rem;
+  border-radius: 0 0 8px 8px;
+}

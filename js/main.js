@@ -12,8 +12,8 @@
     const corruptions = [
         'Brightness', 'Contrast', 'GaussianBlur', 'GaussianNoise',
         'GlobalColourShift', 'GridDistortion', 'GridElasticDeformation',
-        'ImageRotation', 'MotionBlur', 'PerspectiveTransformation', 'Rain',
-        'SaltPepperNoise', 'Shadow', 'CloudGenerator'
+        'ImageFlip', 'ImageRotation', 'MotionBlur', 'PerspectiveTransformation',
+        'Rain', 'SaltPepperNoise', 'Shadow', 'CloudGenerator'
     ];
 
     const datasetSources = {
@@ -51,6 +51,7 @@
         'MotionBlur': 'Blurs the image to simulate movement, as if the camera or object was in motion.',
         'GridDistortion': 'Distorts the image by applying a grid-like warping effect, bending specific areas.',
         'GridElasticDeformation': 'Applies a rubber-sheet-like deformation to the image, bending it smoothly.',
+        'ImageFlip': 'Flips the image horizontally or vertically, mirroring its contents.',
         'PerspectiveTransformation': 'Warps images by changing its perspective, as if viewed from a different angle.',
         'CloudGenerator': 'Overlays or generates cloud-like textures in the image, simulating an overcast sky.'
     };
@@ -292,13 +293,11 @@
              });
          }
 
-         // react when global corruption changes (non-correlation only)
-         const onGlobalCorrChange = () => {
-             updatePlots();
-         };
-         document.querySelectorAll('.experiment').forEach(expDiv => {
-             expDiv.addEventListener('corruptionChanged', onGlobalCorrChange);
-         });
+         // react when global corruption changes (listen only on own experiment div)
+         const ownExpDiv = document.querySelector(`.experiment[data-exp="${expKey}"]`);
+         if (ownExpDiv) {
+             ownExpDiv.addEventListener('corruptionChanged', () => { updatePlots(); });
+         }
 
          function updateUseCaseSelection() {
              thumbs.querySelectorAll('.thumbnail').forEach(t => {
@@ -346,7 +345,6 @@
 
              function setWithFallback(imgEl, primary, fallback, altPrimary, altFallback) {
                  imgEl.onerror = null;
-                 imgEl.src = primary;
                  imgEl.alt = altPrimary;
                  imgEl.onerror = () => {
                      imgEl.onerror = null;
@@ -355,6 +353,7 @@
                      anyFallbackUsed = true;
                      updatePlotContextLabelLocal(showPerCorruption, anyFallbackUsed);
                  };
+                 imgEl.src = primary;
              }
 
              function setWithMultiFallback(imgEl, sources, alts) {
@@ -919,6 +918,7 @@ function setupStickyThumbnailsAcrossExperiments() {
                 if (!bar.classList.contains('is-stuck')) {
                     addSpacer();
                     bar.classList.add('is-stuck');
+                    bar.style.position = 'fixed';
                     updateBarWidthPosition();
                 } else {
                     // keep spacer height updated if images/layout changed
@@ -928,6 +928,7 @@ function setupStickyThumbnailsAcrossExperiments() {
             } else {
                 if (bar.classList.contains('is-stuck')) {
                     bar.classList.remove('is-stuck');
+                    bar.style.position = '';
                     bar.style.width = '';
                     bar.style.left = '';
                     bar.style.transform = '';
