@@ -196,6 +196,12 @@ h3 {
   font-style: italic;
 }
 
+.plots-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 #plots-container.side-by-side,
 .experiment div[id$="plots-container"].side-by-side {
   display: grid;
@@ -209,6 +215,16 @@ h3 {
   .experiment div[id$="plots-container"].side-by-side {
     grid-template-columns: repeat(2, 1fr);
     align-items: start;
+  }
+}
+
+@media (max-width: 520px) {
+  .usecases-images-grid,
+  .corruption-images-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  section {
+    padding: 1.25rem;
   }
 }
 
@@ -376,13 +392,17 @@ h3 {
   margin-left: 0.35rem;
   vertical-align: middle;
 }
+#citation > p {
+  font-size: 0.93rem;
+  line-height: 1.6;
+}
 #citation .code-block {
   position: relative;
-  background: #f6f8fa; /* light background */
-  color: #24292f;      /* dark text */
-  border: 1px solid #d0d7de; /* light border */
-  border-radius: 6px;
-  padding: 1rem 1rem 1rem 1.25rem;
+  background: #f6f8fa;
+  color: #24292f;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  padding: 1.25rem 1.25rem 1.25rem 1.5rem;
   overflow: auto;
 }
 #citation pre {
@@ -390,28 +410,35 @@ h3 {
 }
 #citation code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   white-space: pre;
-  color: #24292f; /* ensure code text is dark */
+  color: #24292f;
+  line-height: 1.55;
 }
 .copy-button {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  background: #f0f1f3; /* light button */
-  color: #24292f;
-  border: 1px solid #d0d7de;
-  border-radius: 6px;
-  padding: 6px 10px;
-  font-size: 0.85rem;
+  top: 10px;
+  right: 10px;
+  background: #ffffff;
+  color: var(--primary-color);
+  border: 1px solid var(--border-color);
+  border-radius: 9999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
   cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.08s ease;
 }
 .copy-button:hover {
-  background: #e6e9ef; /* subtle hover */
+  background: var(--primary-light);
+  border-color: rgba(0, 123, 255, 0.3);
+}
+.copy-button:active {
+  transform: translateY(1px);
 }
 .copy-button.copied {
-  background: #1f6feb; /* blue highlight */
-  border-color: #1f6feb;
+  background: var(--primary-color);
+  border-color: var(--primary-color);
   color: #ffffff;
 }
 
@@ -588,12 +615,15 @@ h3 {
 }
 
 header .authors {
-  margin: 0.5rem 0 0.25rem 0;
+  margin: 0.5rem 0 0.15rem 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #343a40;
 }
 header .affiliations {
   margin: 0;
   color: #6c757d;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
 }
 
 /* Coming Soon overlay */
@@ -650,6 +680,9 @@ body.coming-soon-active #coming-soon-overlay .coming-soon-content {
 .corruption-bar-local {
   gap: 0.5rem;
   margin: 0.75rem 0 0.25rem 0;
+  padding: 0.5rem 0.75rem;
+  border-top: 1px solid var(--border-color);
+  background: transparent;
 }
 
 .corruption-thumb-small {
