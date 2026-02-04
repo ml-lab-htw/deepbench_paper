@@ -870,6 +870,65 @@ body.coming-soon-active #coming-soon-overlay .coming-soon-content {
 }
 
 
+/* Lightbox overlay for enlarged image view */
+#lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 200ms ease;
+    z-index: 2000;
+    cursor: zoom-out;
+}
+
+#lightbox-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#lightbox-overlay #lightbox-img {
+    max-width: 92vw;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+    transform: scale(0.95);
+    transition: transform 200ms ease;
+}
+
+#lightbox-overlay.active #lightbox-img {
+    transform: scale(1);
+}
+
+#lightbox-close {
+    position: absolute;
+    top: 1rem;
+    right: 1.25rem;
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 2.5rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 150ms ease, transform 150ms ease;
+    z-index: 2001;
+}
+
+#lightbox-close:hover {
+    opacity: 1;
+    transform: scale(1.15);
+}
+
+/* Zoomable cursor on clickable images */
+.zoomable-img {
+    cursor: zoom-in;
+}
+
 .copy-button {
     position: absolute;
     top: 10px;

@@ -1091,6 +1091,86 @@ function ensurePrimaryColorRgb() {
     }
 }
 
+// --- LIGHTBOX ---
+function setupLightbox() {
+    const overlay = document.getElementById('lightbox-overlay');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const closeBtn = document.getElementById('lightbox-close');
+    if (!overlay || !lightboxImg || !closeBtn) return;
+
+    function openLightbox(src, alt) {
+        lightboxImg.src = src;
+        lightboxImg.alt = alt || '';
+        overlay.classList.add('active');
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+        overlay.classList.remove('active');
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    // Close on backdrop click (but not on the image itself)
+    overlay.addEventListener('click', (e) => {
+        if (e.target !== lightboxImg) closeLightbox();
+    });
+
+    closeBtn.addEventListener('click', closeLightbox);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay.classList.contains('active')) closeLightbox();
+    });
+
+    // Delegate clicks: any image inside content areas with the zoomable class
+    document.addEventListener('click', (e) => {
+        const img = e.target.closest('img.zoomable-img');
+        if (img) openLightbox(img.src, img.alt);
+    });
+
+    // Mark existing and future content images as zoomable using a MutationObserver
+    function markZoomable(root) {
+        // Selectors for images that should be clickable
+        const selectors = [
+            '#graphical-abstract img',
+            '.corruption-images-grid img',
+            '.usecases-images-grid img',
+            '.plot-block img',
+        ];
+        selectors.forEach(sel => {
+            root.querySelectorAll(sel).forEach(img => {
+                if (!img.classList.contains('thumbnail') && !img.closest('.header-bg-grid')) {
+                    img.classList.add('zoomable-img');
+                }
+            });
+        });
+    }
+
+    // Initial pass
+    markZoomable(document);
+
+    // Observe DOM changes so dynamically added images also become zoomable
+    const observer = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+            for (const node of mutation.addedNodes) {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    if (node.tagName === 'IMG') {
+                        // Check if the added img itself matches
+                        const parent = node.closest('.corruption-images-grid, .usecases-images-grid, .plot-block, #graphical-abstract');
+                        if (parent && !node.classList.contains('thumbnail')) {
+                            node.classList.add('zoomable-img');
+                        }
+                    } else {
+                        markZoomable(node);
+                    }
+                }
+            }
+        }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+}
+
 // Ensure header grid populates on initialize()
 const _initialize_orig = initialize;
 initialize = function() {
@@ -1100,5 +1180,7 @@ initialize = function() {
     ensurePrimaryColorRgb();
     // populate grid (don't block main rendering)
     populateHeaderBgGrid().catch(err => { console.warn('Header grid population failed', err); });
+    // setup lightbox for image zoom
+    setupLightbox();
 };
 
